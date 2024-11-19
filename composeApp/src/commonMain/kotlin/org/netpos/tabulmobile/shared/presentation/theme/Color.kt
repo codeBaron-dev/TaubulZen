@@ -1,6 +1,6 @@
 package org.netpos.tabulmobile.shared.presentation.theme
 import androidx.compose.ui.graphics.Color
-
+val tabulColor = Color(0xFFD80808)
 val primaryLight = Color(0xFF610000)
 val onPrimaryLight = Color(0xFFFFFFFF)
 val primaryContainerLight = Color(0xFF9B160D)

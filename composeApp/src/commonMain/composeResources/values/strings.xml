@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<resources>
+    <string name="go_back">Go back</string>
+    <string name="error_disk_full">Oops, it seems like your disk is full.</string>
+    <string name="error_unknown">Oops, something went wrong.</string>
+    <string name="error_request_timeout">The request timed out.</string>
+    <string name="error_no_internet">Couldn't reach server, please check your internet connection.</string>
+    <string name="error_too_many_requests">Your quota seems to be exceeded.</string>
+    <string name="error_serialization">Couldn't parse data.</string>
+    <string name="first_pager_heading">Explore a World of\nFlavors..</string>
+    <string name="first_pager_sub_heading">Discover restaurants and meals you’ll love, right at your fingertips. From local favorites to international cuisines, we’ve got it all covered.</string>
+    <string name="second_pager_heading">Fast, Easy, and\nConvenient</string>
+    <string name="second_pager_sub_heading">Place orders in just a few taps and enjoy seamless delivery or pick-up options. Your favorite meals are just a moment away.</string>
+    <string name="third_pager_heading">Location-Based\nRecommendations</string>
+    <string name="third_pager_sub_heading">To provide the best dining experience, we’ll need access to your location. This helps us find restaurants and services near you.</string>
+    <string name="forth_pager_heading">Your Location, Your Convenience</string>
+    <string name="forth_pager_sub_heading">To serve you better, we’ll need access to your location for accurate delivery. Sign up or log in to get started!</string>
+    <string name="login_text">Login</string>
+    <string name="register_text">Register</string>
+    <string name="get_started_text">Get Started</string>
+    <string name="skip_text">Skip</string>
+    <string name="next_text">Next</string>
+</resources>
