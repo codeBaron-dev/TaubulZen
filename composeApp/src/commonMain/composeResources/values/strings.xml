@@ -20,4 +20,13 @@
     <string name="get_started_text">Get Started</string>
     <string name="skip_text">Skip</string>
     <string name="next_text">Next</string>
+    <string name="dont_have_account">Don’t have an account?</string>
+    <string name="welcome_back_text">Welcome back!</string>
+    <string name="login_info_text">Enter your credentials to access your account. Your favourite dish is just a click away!</string>
+    <string name="forgot_password_text">Forgot your password?</string>
+    <string name="remember_me_text">Remember me</string>
+    <string name="email_text">Email address</string>
+    <string name="email_hint_text">tabul@gmail.com</string>
+    <string name="password_text">Password</string>
+    <string name="password_hint_text">********</string>
 </resources>

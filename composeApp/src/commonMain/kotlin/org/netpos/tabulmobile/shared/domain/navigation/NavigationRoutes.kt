@@ -18,4 +18,8 @@ sealed interface NavigationRoutes {
 
     @Serializable
     data object Register : NavigationRoutes
+
+    @Serializable
+    data object ForgotPassword : NavigationRoutes
+
 }

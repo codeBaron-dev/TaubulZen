@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.koin.compose.viewmodel.koinViewModel
 import org.netpos.tabulmobile.merchant.presentation.login.ui.LoginScreenRoot
+import org.netpos.tabulmobile.merchant.presentation.login.viewmodels.LoginScreenViewModel
 import org.netpos.tabulmobile.merchant.presentation.onboard.ui.OnboardScreenRoot
 import org.netpos.tabulmobile.merchant.presentation.onboard.viewmodel.OnboardScreenViewModel
 import org.netpos.tabulmobile.merchant.presentation.register.ui.RegisterScreenRoot
@@ -25,20 +26,21 @@ fun TabulNavigationGraph() {
             popEnterTransition = { fadeIn() }
         ) {
             val splashScreenViewModel: SplashScreenViewModel = koinViewModel()
-            SplashScreenRoot(navController, splashScreenViewModel)
+            SplashScreenRoot(navController = navController, splashScreenViewModel = splashScreenViewModel)
         }
         composable<NavigationRoutes.Onboarding>(
             exitTransition = { fadeOut() },
             popEnterTransition = { fadeIn() }
         ) {
             val onboardScreenViewModel: OnboardScreenViewModel = koinViewModel()
-            OnboardScreenRoot(navController, onboardScreenViewModel)
+            OnboardScreenRoot(navController = navController, onboardScreenViewModel = onboardScreenViewModel)
         }
         composable<NavigationRoutes.Login>(
             exitTransition = { fadeOut() },
             popEnterTransition = { fadeIn() }
         ) {
-            LoginScreenRoot()
+            val loginScreenViewModel: LoginScreenViewModel = koinViewModel()
+            LoginScreenRoot(navController = navController, loginScreenViewModel = loginScreenViewModel)
         }
         composable<NavigationRoutes.Register>(
             exitTransition = { fadeOut() },
