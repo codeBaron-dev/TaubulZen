@@ -29,4 +29,6 @@
     <string name="email_hint_text">tabul@gmail.com</string>
     <string name="password_text">Password</string>
     <string name="password_hint_text">********</string>
+    <string name="authenticating_text">Authenticating...</string>
+    <string name="unknown_error">Unknown error</string>
 </resources>

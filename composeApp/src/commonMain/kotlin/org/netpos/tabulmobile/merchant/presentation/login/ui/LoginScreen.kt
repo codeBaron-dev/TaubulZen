@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
@@ -31,6 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -43,6 +45,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.SharedFlow
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
 import org.netpos.tabulmobile.merchant.presentation.login.viewmodels.LoginScreenIntent
@@ -50,9 +53,13 @@ import org.netpos.tabulmobile.merchant.presentation.login.viewmodels.LoginScreen
 import org.netpos.tabulmobile.merchant.presentation.login.viewmodels.LoginScreenViewModel
 import org.netpos.tabulmobile.shared.data.emailRegex
 import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
+import org.netpos.tabulmobile.shared.presentation.utils.CustomLoadingDialog
+import org.netpos.tabulmobile.showToast
+import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold
 import tabulmobile.composeapp.generated.resources.Res
+import tabulmobile.composeapp.generated.resources.authenticating_text
 import tabulmobile.composeapp.generated.resources.dont_have_account
 import tabulmobile.composeapp.generated.resources.email_text
 import tabulmobile.composeapp.generated.resources.forgot_password_text
@@ -61,19 +68,49 @@ import tabulmobile.composeapp.generated.resources.login_text
 import tabulmobile.composeapp.generated.resources.password_text
 import tabulmobile.composeapp.generated.resources.register_text
 import tabulmobile.composeapp.generated.resources.remember_me_text
+import tabulmobile.composeapp.generated.resources.unknown_error
 import tabulmobile.composeapp.generated.resources.welcome_back_text
 
 @Composable
 fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: LoginScreenViewModel) {
 
-    val loginViewModelState by loginScreenViewModel.state.collectAsState(initial = LoginScreenState()) // Collect state flow
+    val loginViewModelState by loginScreenViewModel.state.collectAsState(initial = LoginScreenState())
+
+    LoginScreen(
+        loginViewModelState = loginViewModelState,
+        onAction = { intent ->
+            loginScreenViewModel.sendIntent(intent)
+        },
+        navController = navController,
+        navigationEvent = loginScreenViewModel.navigationEvent
+    )
+}
+
+@Composable
+fun LoginScreen(
+    loginViewModelState: LoginScreenState,
+    onAction: (LoginScreenIntent) -> Unit,
+    navController: NavHostController,
+    navigationEvent: SharedFlow<NavigationRoutes>,
+) {
+
+    LaunchedEffect(key1 = Unit) {
+        navigationEvent.collect { destination ->
+            navController.navigate(route = destination)
+        }
+    }
+
+    CustomLoadingDialog(
+        showDialog = loginViewModelState.isLoading,
+        message = stringResource(Res.string.authenticating_text)
+    )
 
     Scaffold(
         bottomBar = {
             BottomAppBar(
                 containerColor = Color.Transparent,
                 modifier = Modifier
-                    .fillMaxWidth().height(200.dp)
+                    .fillMaxWidth().wrapContentHeight()
                     .padding(start = 16.dp, end = 16.dp),
                 tonalElevation = 0.dp,
                 content = {
@@ -85,7 +122,7 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
                             Button(
                                 modifier = Modifier.fillMaxWidth().height(42.dp),
                                 onClick = {
-                                    loginScreenViewModel.sendIntent(LoginScreenIntent.LoginActionClick)
+                                    onAction(LoginScreenIntent.LoginActionClick)
                                 },
                                 colors = ButtonDefaults.buttonColors(containerColor = tabulColor),
                                 content = {
@@ -113,7 +150,7 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
                                     )
                                     Spacer(modifier = Modifier.width(1.dp))
                                     TextButton(onClick = {
-                                        loginScreenViewModel.sendIntent(
+                                        onAction(
                                             LoginScreenIntent.RegisterActionClick
                                         )
                                     }) {
@@ -134,6 +171,22 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
             )
         },
         content = { contentPadding ->
+
+            when{
+                loginViewModelState.isLoading -> CustomLoadingDialog(
+                    showDialog = loginViewModelState.isLoading,
+                    message = stringResource(Res.string.authenticating_text)
+                )
+
+                loginViewModelState.responseSuccess -> {
+                    onAction(LoginScreenIntent.HomeActionClick)
+                }
+
+                loginViewModelState.responseFailed -> {
+                    showToast(loginViewModelState.errorMessage ?: stringResource(Res.string.unknown_error))
+                }
+            }
+
             Column(
                 modifier = Modifier.fillMaxSize().padding(contentPadding)
                     .padding(horizontal = 16.dp),
@@ -169,7 +222,7 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
                     OutlinedTextField(
                         value = loginViewModelState.email,
                         onValueChange = {
-                            loginScreenViewModel.sendIntent(
+                            onAction(
                                 LoginScreenIntent.EmailChanged(
                                     it
                                 )
@@ -231,7 +284,7 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
                     OutlinedTextField(
                         value = loginViewModelState.password,
                         onValueChange = {
-                            loginScreenViewModel.sendIntent(
+                            onAction(
                                 LoginScreenIntent.PasswordChanged(
                                     it
                                 )
@@ -257,7 +310,7 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
                                 Icons.Filled.VisibilityOff
                             }
                             IconButton(onClick = {
-                                loginScreenViewModel.sendIntent(
+                                onAction(
                                     LoginScreenIntent.PasswordVisibilityChanged(
                                         !loginViewModelState.isPasswordVisible
                                     )
@@ -312,7 +365,7 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
                                     Checkbox(
                                         checked = loginViewModelState.rememberMe,
                                         onCheckedChange = {
-                                            loginScreenViewModel.sendIntent(
+                                            onAction(
                                                 LoginScreenIntent.RememberMeChanged(
                                                     it
                                                 )
@@ -339,7 +392,7 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
                                 content = {
                                     TextButton(
                                         onClick = {
-                                            loginScreenViewModel.sendIntent(LoginScreenIntent.ForgotPasswordActionClick)
+                                            onAction(LoginScreenIntent.ForgotPasswordActionClick)
                                         },
                                         content = {
                                             Text(
@@ -349,7 +402,8 @@ fun LoginScreenRoot(navController: NavHostController, loginScreenViewModel: Logi
                                                     fontSize = 13.sp
                                                 )
                                             )
-                                        })
+                                        }
+                                    )
                                 }
                             )
                         }

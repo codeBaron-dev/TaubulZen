@@ -8,4 +8,5 @@ sealed class LoginScreenIntent {
     data object ForgotPasswordActionClick : LoginScreenIntent()
     data object RegisterActionClick : LoginScreenIntent()
     data object LoginActionClick : LoginScreenIntent()
+    data object HomeActionClick : LoginScreenIntent()
 }

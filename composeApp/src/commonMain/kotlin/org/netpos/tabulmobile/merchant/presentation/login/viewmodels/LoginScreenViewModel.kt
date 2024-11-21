@@ -3,15 +3,23 @@ package org.netpos.tabulmobile.merchant.presentation.login.viewmodels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.netpos.tabulmobile.merchant.data.login.remote.login.payload.LoginPayloadModel
+import org.netpos.tabulmobile.merchant.data.remote.repository.LoginRepository
+import org.netpos.tabulmobile.merchant.domain.remote.onError
+import org.netpos.tabulmobile.merchant.domain.remote.onSuccess
 import org.netpos.tabulmobile.shared.data.validateLoginForm
 import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
 
-class LoginScreenViewModel : ViewModel() {
+class LoginScreenViewModel(
+    private val loginRepository: LoginRepository
+) : ViewModel() {
 
     private val _state =
-        MutableSharedFlow<LoginScreenState>(replay = 1) // Replay ensures the latest state is emitted to new collectors.
+        MutableStateFlow(LoginScreenState())
     val state = _state.asSharedFlow()
 
     private val intents = MutableSharedFlow<LoginScreenIntent>()
@@ -20,17 +28,15 @@ class LoginScreenViewModel : ViewModel() {
     val navigationEvent = _navigationEvent.asSharedFlow()
 
     init {
-        // Start handling intents
         handleIntents()
-        // Emit initial state
         viewModelScope.launch {
-            _state.emit(LoginScreenState()) // Emit initial state
+            _state.emit(LoginScreenState())
         }
     }
 
     fun sendIntent(intent: LoginScreenIntent) {
         viewModelScope.launch {
-            intents.emit(intent) // Emit user intent
+            intents.emit(intent)
         }
     }
 
@@ -65,6 +71,12 @@ class LoginScreenViewModel : ViewModel() {
                     is LoginScreenIntent.PasswordVisibilityChanged -> {
                         updateState { it.copy(isPasswordVisible = intent.isPasswordVisible) }
                     }
+
+                    LoginScreenIntent.HomeActionClick -> {
+                        if (_state.replayCache.firstOrNull()?.responseSuccess == true) {
+                            _navigationEvent.emit(NavigationRoutes.Home)
+                        }
+                    }
                 }
             }
         }
@@ -75,8 +87,11 @@ class LoginScreenViewModel : ViewModel() {
         val validationResult = validateLoginForm(currentState.email, currentState.password)
 
         if (validationResult.isEmailValid && validationResult.isPasswordValid) {
-            // Proceed with API call or other login logic
-            _navigationEvent.emit(NavigationRoutes.Home) // Example success route
+            val loginPayloadModel = LoginPayloadModel(
+                email = currentState.email,
+                password = currentState.password
+            )
+            login(loginPayloadModel = loginPayloadModel)
         } else {
             updateState {
                 it.copy(
@@ -85,6 +100,31 @@ class LoginScreenViewModel : ViewModel() {
                 )
             }
         }
+    }
+
+    private fun login(loginPayloadModel: LoginPayloadModel) = viewModelScope.launch {
+        _state.update { it.copy(isLoading = true) }
+        loginRepository.login(loginPayloadModel = loginPayloadModel)
+            .onSuccess { response ->
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        responseSuccess = true,
+                        responseFailed = false,
+                        loginResponseModel = response
+                    )
+                }
+            }
+            .onError {
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        responseSuccess = false,
+                        responseFailed = true,
+                        errorMessage = it.errorMessage
+                    )
+                }
+            }
     }
 
     private suspend fun updateState(transform: (LoginScreenState) -> LoginScreenState) {
