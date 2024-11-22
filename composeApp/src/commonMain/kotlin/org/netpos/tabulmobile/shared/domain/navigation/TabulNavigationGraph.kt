@@ -7,13 +7,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import org.koin.compose.viewmodel.koinViewModel
-import org.netpos.tabulmobile.merchant.presentation.login.ui.LoginScreenRoot
-import org.netpos.tabulmobile.merchant.presentation.login.viewmodels.LoginScreenViewModel
-import org.netpos.tabulmobile.merchant.presentation.onboard.ui.OnboardScreenRoot
-import org.netpos.tabulmobile.merchant.presentation.onboard.viewmodel.OnboardScreenViewModel
-import org.netpos.tabulmobile.merchant.presentation.register.ui.RegisterScreenRoot
-import org.netpos.tabulmobile.merchant.presentation.splash.ui.SplashScreenRoot
-import org.netpos.tabulmobile.merchant.presentation.splash.viewmodel.SplashScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.login.ui.LoginScreenRoot
+import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.onboard.ui.OnboardScreenRoot
+import org.netpos.tabulmobile.customer.presentation.onboard.viewmodel.OnboardScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.register.ui.RegisterScreenRoot
+import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.splash.ui.SplashScreenRoot
+import org.netpos.tabulmobile.customer.presentation.splash.view_model.SplashScreenViewModel
 import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
 
 @Composable
@@ -46,7 +47,8 @@ fun TabulNavigationGraph() {
             exitTransition = { fadeOut() },
             popEnterTransition = { fadeIn() }
         ) {
-            RegisterScreenRoot()
+            val registerScreenViewModel: RegistrationScreenViewModel = koinViewModel()
+            RegisterScreenRoot(navController = navController, registerScreenViewModel = registerScreenViewModel)
         }
     }
 }

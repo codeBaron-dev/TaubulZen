@@ -21,6 +21,7 @@
     <string name="skip_text">Skip</string>
     <string name="next_text">Next</string>
     <string name="dont_have_account">Don’t have an account?</string>
+    <string name="already_have_account">Already have an account?</string>
     <string name="welcome_back_text">Welcome back!</string>
     <string name="login_info_text">Enter your credentials to access your account. Your favourite dish is just a click away!</string>
     <string name="forgot_password_text">Forgot your password?</string>
@@ -29,6 +30,12 @@
     <string name="email_hint_text">tabul@gmail.com</string>
     <string name="password_text">Password</string>
     <string name="password_hint_text">********</string>
+    <string name="confirm_password_text">Confirm password</string>
     <string name="authenticating_text">Authenticating...</string>
     <string name="unknown_error">Unknown error</string>
+    <string name="create_account_text">Create account</string>
+    <string name="create_account_info_text">Enter your details to create an account and dive into a world of deliciousness delivered right to your doorstep. </string>
+    <string name="full_name_text">Full name</string>
+    <string name="phone_number_text">Phone number</string>
+    <string name="accept_terms_text">I accept the terms and conditions</string>"
 </resources>
