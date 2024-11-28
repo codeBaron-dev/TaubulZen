@@ -7,7 +7,8 @@ interface ErrorDataTypes: ErrorInterface {
         no_internet,
         server,
         serialization,
-        unknown
+        unknown,
+        unauthorized
     }
 
     enum class Local: ErrorDataTypes {

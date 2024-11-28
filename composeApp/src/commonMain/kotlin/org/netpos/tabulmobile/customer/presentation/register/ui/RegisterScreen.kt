@@ -56,7 +56,7 @@ import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
 import org.netpos.tabulmobile.shared.presentation.utils.CustomLoadingDialog
 import org.netpos.tabulmobile.shared.presentation.utils.TabulButton
 import org.netpos.tabulmobile.showToast
-import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
+import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold
 import tabulmobile.composeapp.generated.resources.Res

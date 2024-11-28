@@ -15,7 +15,8 @@ import org.netpos.tabulmobile.customer.presentation.register.ui.RegisterScreenRo
 import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.splash.ui.SplashScreenRoot
 import org.netpos.tabulmobile.customer.presentation.splash.view_model.SplashScreenViewModel
-import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
+import org.netpos.tabulmobile.customer.presentation.password_reset.ui.PasswordResetScreenRoot
+import org.netpos.tabulmobile.customer.presentation.password_reset.view_model.PasswordResetViewModel
 
 @Composable
 fun TabulNavigationGraph() {
@@ -49,6 +50,13 @@ fun TabulNavigationGraph() {
         ) {
             val registerScreenViewModel: RegistrationScreenViewModel = koinViewModel()
             RegisterScreenRoot(navController = navController, registerScreenViewModel = registerScreenViewModel)
+        }
+        composable<NavigationRoutes.ForgotPassword>(
+            exitTransition = { fadeOut() },
+            popEnterTransition = { fadeIn() }
+        ) {
+            val passwordResetViewModel: PasswordResetViewModel = koinViewModel()
+            PasswordResetScreenRoot(navController = navController, passwordResetViewModel = passwordResetViewModel)
         }
     }
 }

@@ -12,7 +12,7 @@ import org.netpos.tabulmobile.customer.data.remote.repository.login.LoginReposit
 import org.netpos.tabulmobile.customer.domain.remote.onError
 import org.netpos.tabulmobile.customer.domain.remote.onSuccess
 import org.netpos.tabulmobile.shared.data.validateLoginForm
-import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
+import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 
 class LoginScreenViewModel(
     private val loginRepository: LoginRepository
@@ -115,13 +115,13 @@ class LoginScreenViewModel(
                     )
                 }
             }
-            .onError {
+            .onError {  errorResponse ->
                 _state.update {
                     it.copy(
                         isLoading = false,
                         responseSuccess = false,
                         responseFailed = true,
-                        errorMessage = it.errorMessage
+                        errorMessage = errorResponse
                     )
                 }
             }

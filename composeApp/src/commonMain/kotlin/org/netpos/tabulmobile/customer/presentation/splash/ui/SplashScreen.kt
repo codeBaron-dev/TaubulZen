@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.netpos.tabulmobile.customer.presentation.splash.view_model.SplashScreenIntent
 import org.netpos.tabulmobile.customer.presentation.splash.view_model.SplashScreenViewModel
-import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
+import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import tabulmobile.composeapp.generated.resources.Res
 import tabulmobile.composeapp.generated.resources.tb_logo
 import tabulmobile.composeapp.generated.resources.tb_logo_light

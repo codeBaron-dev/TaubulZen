@@ -53,7 +53,7 @@ import org.netpos.tabulmobile.customer.presentation.onboard.ui.pagers.ThirdOnboa
 import org.netpos.tabulmobile.customer.presentation.onboard.viewmodel.OnboardScreenIntent
 import org.netpos.tabulmobile.customer.presentation.onboard.viewmodel.OnboardScreenViewModel
 import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
-import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
+import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Bold
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold

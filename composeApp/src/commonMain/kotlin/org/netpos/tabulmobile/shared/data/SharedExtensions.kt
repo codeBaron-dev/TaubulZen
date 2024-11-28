@@ -2,6 +2,7 @@ package org.netpos.tabulmobile.shared.data
 
 import org.netpos.tabulmobile.customer.data.models.login.LoginFormValidationModel
 import org.netpos.tabulmobile.customer.data.models.register.RegistrationFormValidationModel
+import org.stakeny.stakeny.onboard.data.model.password_reset.ResetPasswordEmailFormValidationModel
 
 val emailRegex = Regex(pattern = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
@@ -43,5 +44,13 @@ fun validateRegistrationForm(
         phoneNumberError = if (!isPhoneValid) "Invalid phone number" else "",
         acceptTerms = acceptTerms,
         acceptTermsError = if (!acceptTerms) "You must accept the terms and conditions" else ""
+    )
+}
+
+fun validateResetPasswordEmailForm(email: String): ResetPasswordEmailFormValidationModel {
+    val isEmailValid = email.matches(emailRegex)
+    return ResetPasswordEmailFormValidationModel(
+        isEmailValid = isEmailValid,
+        emailError = if (!isEmailValid) "Invalid email format" else ""
     )
 }

@@ -1,4 +1,4 @@
-package org.stakeny.stakeny.shared.domain.navigation
+package org.netpos.tabulmobile.shared.domain.navigation
 
 import kotlinx.serialization.Serializable
 
@@ -21,5 +21,8 @@ sealed interface NavigationRoutes {
 
     @Serializable
     data object ForgotPassword : NavigationRoutes
+
+    @Serializable
+    data object OtpVerification : NavigationRoutes
 
 }

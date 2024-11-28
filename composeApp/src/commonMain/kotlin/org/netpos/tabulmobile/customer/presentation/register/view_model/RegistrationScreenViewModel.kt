@@ -12,7 +12,7 @@ import org.netpos.tabulmobile.customer.data.remote.repository.register.Registrat
 import org.netpos.tabulmobile.customer.domain.remote.onError
 import org.netpos.tabulmobile.customer.domain.remote.onSuccess
 import org.netpos.tabulmobile.shared.data.validateRegistrationForm
-import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
+import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 
 class RegistrationScreenViewModel(
     private val registrationRepository: RegistrationRepository

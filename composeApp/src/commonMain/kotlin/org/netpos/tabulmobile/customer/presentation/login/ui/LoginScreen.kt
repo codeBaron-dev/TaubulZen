@@ -33,6 +33,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -44,17 +48,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenIntent
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenState
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
 import org.netpos.tabulmobile.shared.data.emailRegex
+import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
 import org.netpos.tabulmobile.shared.presentation.utils.CustomLoadingDialog
 import org.netpos.tabulmobile.shared.presentation.utils.TabulButton
 import org.netpos.tabulmobile.showToast
-import org.stakeny.stakeny.shared.domain.navigation.NavigationRoutes
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold
 import tabulmobile.composeapp.generated.resources.Res
@@ -67,7 +72,6 @@ import tabulmobile.composeapp.generated.resources.login_text
 import tabulmobile.composeapp.generated.resources.password_text
 import tabulmobile.composeapp.generated.resources.register_text
 import tabulmobile.composeapp.generated.resources.remember_me_text
-import tabulmobile.composeapp.generated.resources.unknown_error
 import tabulmobile.composeapp.generated.resources.welcome_back_text
 
 @Composable
@@ -93,6 +97,9 @@ fun LoginScreen(
     navigationEvent: SharedFlow<NavigationRoutes>,
 ) {
 
+    val coroutineScope = rememberCoroutineScope()
+    var showToast by remember { mutableStateOf(false) }
+
     LaunchedEffect(key1 = Unit) {
         navigationEvent.collect { destination ->
             navController.navigate(route = destination)
@@ -116,6 +123,7 @@ fun LoginScreen(
                             TabulButton(
                                 resource = Res.string.login_text,
                                 actionClick = {
+                                    showToast = true
                                     onAction(LoginScreenIntent.LoginActionClick)
                                 },
                                 enabled = true
@@ -155,7 +163,6 @@ fun LoginScreen(
             )
         },
         content = { contentPadding ->
-
             when {
                 loginViewModelState.isLoading -> CustomLoadingDialog(
                     showDialog = loginViewModelState.isLoading,
@@ -167,9 +174,12 @@ fun LoginScreen(
                 }
 
                 loginViewModelState.responseFailed -> {
-                    showToast(
-                        loginViewModelState.errorMessage ?: stringResource(Res.string.unknown_error)
-                    )
+                    coroutineScope.launch {
+                        if (showToast) {
+                            showToast(loginViewModelState.errorMessage.toString())
+                            showToast = false
+                        }
+                    }
                 }
             }
 

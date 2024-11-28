@@ -37,5 +37,14 @@
     <string name="create_account_info_text">Enter your details to create an account and dive into a world of deliciousness delivered right to your doorstep. </string>
     <string name="full_name_text">Full name</string>
     <string name="phone_number_text">Phone number</string>
-    <string name="accept_terms_text">I accept the terms and conditions</string>"
+    <string name="accept_terms_text">I accept the terms and conditions</string>
+    <string name="reset_password_text">Reset Password</string>
+    <string name="reset_password_info_text">Enter your email address to reset your password.</string>
+    <string name="send_verification_code">Send Verification Code</string>
+    <string name="email_verification_text">Email Verification</string>
+    <string name="email_verification_info_text">Enter the verification 4-digit code sent to your email address.</string>
+    <string name="verify_otp_text">Verify OTP</string>
+    <string name="didnt_receive_otp_code_text">Didn’t receive the OTP code?</string>
+    <string name="request_new_otp_code_text">Request new code in</string>
+    <string name="resend_otp_code_text">Resend OTP</string>
 </resources>

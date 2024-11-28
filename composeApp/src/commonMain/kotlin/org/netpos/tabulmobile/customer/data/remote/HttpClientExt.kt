@@ -6,6 +6,8 @@ import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.statement.HttpResponse
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.coroutines.ensureActive
+import org.netpos.tabulmobile.customer.data.remote.network.RemoteErrorModel
+import org.netpos.tabulmobile.customer.data.remote.network.TabulConstants.SERVER_ERROR_MESSAGE
 import org.netpos.tabulmobile.customer.domain.remote.ErrorDataTypes
 import org.netpos.tabulmobile.customer.domain.remote.TabulResult
 import kotlin.coroutines.coroutineContext
@@ -16,12 +18,12 @@ suspend inline fun <reified T> safeCall(
     val response = try {
         execute()
     } catch(e: SocketTimeoutException) {
-        return TabulResult.Error(ErrorDataTypes.Remote.request_timeout)
+        return TabulResult.Error(SERVER_ERROR_MESSAGE)
     } catch(e: UnresolvedAddressException) {
-        return TabulResult.Error(ErrorDataTypes.Remote.no_internet)
+        return TabulResult.Error(SERVER_ERROR_MESSAGE)
     } catch (e: Exception) {
         coroutineContext.ensureActive()
-        return TabulResult.Error(ErrorDataTypes.Remote.unknown)
+        return TabulResult.Error(SERVER_ERROR_MESSAGE)
     }
 
     return responseToTabulResult(response)
@@ -35,12 +37,16 @@ suspend inline fun <reified T> responseToTabulResult(
             try {
                 TabulResult.Success(response.body<T>())
             } catch(e: NoTransformationFoundException) {
-                TabulResult.Error(ErrorDataTypes.Remote.serialization)
+                TabulResult.Error("")
             }
         }
-        408 -> TabulResult.Error(ErrorDataTypes.Remote.request_timeout)
-        429 -> TabulResult.Error(ErrorDataTypes.Remote.too_many_requests)
-        in 500..599 -> TabulResult.Error(ErrorDataTypes.Remote.server)
-        else -> TabulResult.Error(ErrorDataTypes.Remote.unknown)
+        else -> {
+            try {
+                val error = response.body<RemoteErrorModel>()
+                TabulResult.Error(error = error.message.toString())
+            } catch(exception: Exception) {
+                TabulResult.Error(error = exception.message ?: SERVER_ERROR_MESSAGE)
+            }
+        }
     }
 }

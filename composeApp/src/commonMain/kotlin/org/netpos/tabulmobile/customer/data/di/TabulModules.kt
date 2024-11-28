@@ -10,10 +10,13 @@ import org.netpos.tabulmobile.customer.data.remote.network.KtorRemoteDataSource
 import org.netpos.tabulmobile.customer.data.remote.network.RemoteDataSource
 import org.netpos.tabulmobile.customer.data.remote.repository.login.LoginRepository
 import org.netpos.tabulmobile.customer.data.remote.repository.login.LoginRepositoryInterface
-import org.netpos.tabulmobile.customer.data.remote.repository.register.RegistrationRepositoryInterface
+import org.netpos.tabulmobile.customer.data.remote.repository.password_reset.PasswordResetRepository
+import org.netpos.tabulmobile.customer.data.remote.repository.password_reset.PasswordResetRepositoryInterface
 import org.netpos.tabulmobile.customer.data.remote.repository.register.RegistrationRepository
+import org.netpos.tabulmobile.customer.data.remote.repository.register.RegistrationRepositoryInterface
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.onboard.viewmodel.OnboardScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.password_reset.view_model.PasswordResetViewModel
 import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.splash.view_model.SplashScreenViewModel
 
@@ -25,9 +28,11 @@ val sharedModule = module {
     viewModel { OnboardScreenViewModel() }
     viewModel { LoginScreenViewModel(loginRepository = get()) }
     viewModel { RegistrationScreenViewModel(registrationRepository = get()) }
+    viewModel { PasswordResetViewModel(passwordResetRepository = get()) }
 
     single { HttpClientFactory.create(engine = get()) }
     singleOf(::KtorRemoteDataSource).bind<RemoteDataSource>()
     singleOf(::LoginRepository).bind<LoginRepositoryInterface>()
     singleOf(::RegistrationRepository).bind<RegistrationRepositoryInterface>()
+    singleOf(::PasswordResetRepository).bind<PasswordResetRepositoryInterface>()
 }

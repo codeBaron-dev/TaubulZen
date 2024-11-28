@@ -2,8 +2,7 @@ package org.netpos.tabulmobile.customer.domain.remote
 
 sealed interface TabulResult<out D, out E: ErrorDataTypes> {
     data class Success<out D>(val data: D): TabulResult<D, Nothing>
-    data class Error<out E: ErrorDataTypes>(val error: E):
-        TabulResult<Nothing, E>
+    data class Error<out E>(val error: String): TabulResult<E, Nothing>
 }
 
 inline fun <T, E: ErrorDataTypes, R> TabulResult<T, E>.map(map: (T) -> R): TabulResult<R, E> {
@@ -26,7 +25,7 @@ inline fun <T, E: ErrorDataTypes> TabulResult<T, E>.onSuccess(action: (T) -> Uni
         }
     }
 }
-inline fun <T, E: ErrorDataTypes> TabulResult<T, E>.onError(action: (E) -> Unit): TabulResult<T, E> {
+inline fun <T, E: ErrorDataTypes> TabulResult<T, E>.onError(action: (String) -> Unit): TabulResult<T, E> {
     return when(this) {
         is TabulResult.Error -> {
             action(error)
