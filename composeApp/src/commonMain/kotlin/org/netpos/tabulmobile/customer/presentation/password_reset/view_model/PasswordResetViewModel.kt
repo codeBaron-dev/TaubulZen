@@ -47,7 +47,8 @@ class PasswordResetViewModel(
                         updateState { it.copy(email = intent.email) }
                     }
 
-                    PasswordResetScreenIntent.SendEmailActionClick -> {
+                    is PasswordResetScreenIntent.SendEmailActionClick -> {
+                        updateState { it.copy(isDeviceConnectedToInternet = intent.isDeviceConnectedToInternet) }
                         validateAndSubmitEmailForm()
                     }
 
@@ -65,12 +66,13 @@ class PasswordResetViewModel(
         val currentState = _state.replayCache.firstOrNull() ?: PasswordResetScreenState()
         val validationResult = validateResetPasswordEmailForm(currentState.email)
 
-        if (validationResult.isEmailValid) {
+        if (validationResult.isEmailValid && currentState.isDeviceConnectedToInternet) {
             forgetPassword(email = currentState.email)
         } else {
             updateState {
                 it.copy(
-                    emailError = validationResult.emailError
+                    emailError = validationResult.emailError,
+                    noInternetConnection = false
                 )
             }
         }

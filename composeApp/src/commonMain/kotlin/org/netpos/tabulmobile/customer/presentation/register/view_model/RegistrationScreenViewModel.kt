@@ -72,7 +72,8 @@ class RegistrationScreenViewModel(
                         updateState { it.copy(phoneNumber = intent.phoneNumber) }
                     }
 
-                    RegistrationScreenIntent.RegisterActionClick -> {
+                    is RegistrationScreenIntent.RegisterActionClick -> {
+                        updateState { it.copy(isDeviceConnectedToInternet = intent.isDeviceConnectedToInternet) }
                         validateAndSubmitRegistrationForm()
                     }
 
@@ -85,6 +86,10 @@ class RegistrationScreenViewModel(
 
                     RegistrationScreenIntent.HomeActionClick -> {
                         _navigationEvent.emit(value = NavigationRoutes.Home)
+                    }
+
+                    RegistrationScreenIntent.LocationActionClick -> {
+                        _navigationEvent.emit(value = NavigationRoutes.Location)
                     }
                 }
             }
@@ -107,7 +112,8 @@ class RegistrationScreenViewModel(
             validationResult.isConfirmPasswordValid &&
             validationResult.isFullNameValid &&
             validationResult.isPhoneNumberValid &&
-            validationResult.acceptTerms
+            validationResult.acceptTerms &&
+            currentState.isDeviceConnectedToInternet
         ) {
             val registrationPayloadModel = RegistrationPayloadModel(
                 fullName = currentState.fullName,
@@ -125,7 +131,8 @@ class RegistrationScreenViewModel(
                     confirmPasswordError = validationResult.confirmPasswordError,
                     emailError = validationResult.emailError,
                     passwordError = validationResult.passwordError,
-                    acceptTermsError = validationResult.acceptTermsError
+                    acceptTermsError = validationResult.acceptTermsError,
+                    noInternetConnection = true
                 )
             }
         }

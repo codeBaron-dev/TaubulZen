@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 data class RegistrationPayloadModel(
     @SerialName("email")
     val email: String?,
-    @SerialName("full_name")
+    @SerialName("fullname")
     val fullName: String?,
     @SerialName("phone_number")
     val phoneNumber: String?,

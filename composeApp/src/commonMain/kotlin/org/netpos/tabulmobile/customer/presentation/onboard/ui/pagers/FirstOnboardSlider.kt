@@ -22,10 +22,12 @@ import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
 import org.netpos.tabulmobile.customer.presentation.onboard.ui.SharedPageBottomBarView
 import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
+import org.netpos.tabulmobile.shared.presentation.utils.SharedOnboardImage
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.Res
 import tabulmobile.composeapp.generated.resources.first_pager_heading
 import tabulmobile.composeapp.generated.resources.first_pager_sub_heading
+import tabulmobile.composeapp.generated.resources.onboard_couple_dinner_icon
 import tabulmobile.composeapp.generated.resources.skip_text
 
 @Composable
@@ -66,7 +68,7 @@ fun FirstOnboardSlider(skipToLastPager: () -> Unit) {
                         }
                     )
                     Spacer(modifier = Modifier.height(145.dp))
-
+                    SharedOnboardImage(painter = Res.drawable.onboard_couple_dinner_icon)
                 }
             )
         }

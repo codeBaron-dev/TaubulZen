@@ -7,6 +7,7 @@ import org.netpos.tabulmobile.customer.data.di.initKoin
 class TabulApplication: Application() {
     override fun onCreate() {
         super.onCreate()
+        ConnectivityCheckerProvider.context = this
         initKoin {
             androidContext(this@TabulApplication)
         }

@@ -7,5 +7,7 @@ import org.netpos.tabulmobile.customer.domain.remote.TabulResult
 
 interface PasswordResetRepositoryInterface {
 
-    suspend fun forgotPassword(passwordResetPayloadModel: PasswordResetPayloadModel): TabulResult<PasswordResetResponse, ErrorDataTypes.Remote>
+    suspend fun forgotPassword(
+        passwordResetPayloadModel: PasswordResetPayloadModel
+    ): TabulResult<PasswordResetResponse, ErrorDataTypes.Remote>
 }

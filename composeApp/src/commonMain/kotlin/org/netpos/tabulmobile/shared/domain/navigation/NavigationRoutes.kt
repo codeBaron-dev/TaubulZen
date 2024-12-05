@@ -25,4 +25,11 @@ sealed interface NavigationRoutes {
     @Serializable
     data object OtpVerification : NavigationRoutes
 
+    @Serializable
+    data object CreateNewPassword : NavigationRoutes
+
+    @Serializable
+    data object Location : NavigationRoutes
+
+
 }

@@ -12,20 +12,18 @@ data class User(
     val email: String?,
     @SerialName("email_verified_at")
     val emailVerifiedAt: String?,
-    @SerialName("first_name")
-    val firstName: String?,
+    @SerialName("fullname")
+    val fullname: String?,
     @SerialName("id")
     val id: Int?,
     @SerialName("is_active")
     val isActive: Int?,
-    @SerialName("last_name")
-    val lastName: String?,
     @SerialName("password_reset_expires_at")
     val passwordResetExpiresAt: String?,
     @SerialName("password_reset_token")
     val passwordResetToken: String?,
-    @SerialName("phone")
-    val phone: String?,
+    @SerialName("phone_number")
+    val phoneNumber: String?,
     @SerialName("profile_image")
     val profileImage: String?,
     @SerialName("role")

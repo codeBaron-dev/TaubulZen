@@ -19,6 +19,8 @@ data class RegistrationScreenState(
     val responseSuccess: Boolean = false,
     val responseFailed: Boolean = false,
     val errorMessage: String? = null,
+    val isDeviceConnectedToInternet: Boolean = false,
+    val noInternetConnection: Boolean = false,
     val isPasswordVisible: Boolean = false,
     val isConfirmPasswordVisible: Boolean = false,
     val registrationResponseModel: RegistrationResponseModel? = null,

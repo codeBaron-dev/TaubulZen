@@ -51,6 +51,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
+import org.netpos.tabulmobile.ConnectivityCheckerProvider
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorage
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorageImpl
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenIntent
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenState
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
@@ -69,6 +72,7 @@ import tabulmobile.composeapp.generated.resources.email_text
 import tabulmobile.composeapp.generated.resources.forgot_password_text
 import tabulmobile.composeapp.generated.resources.login_info_text
 import tabulmobile.composeapp.generated.resources.login_text
+import tabulmobile.composeapp.generated.resources.no_internet_connection_text
 import tabulmobile.composeapp.generated.resources.password_text
 import tabulmobile.composeapp.generated.resources.register_text
 import tabulmobile.composeapp.generated.resources.remember_me_text
@@ -99,6 +103,9 @@ fun LoginScreen(
 
     val coroutineScope = rememberCoroutineScope()
     var showToast by remember { mutableStateOf(false) }
+    val checker = ConnectivityCheckerProvider.getConnectivityChecker()
+    var isDeviceConnectedToInternet by remember { mutableStateOf(false) }
+    val keyValueStorage: TabulKeyStorage = TabulKeyStorageImpl()
 
     LaunchedEffect(key1 = Unit) {
         navigationEvent.collect { destination ->
@@ -124,7 +131,15 @@ fun LoginScreen(
                                 resource = Res.string.login_text,
                                 actionClick = {
                                     showToast = true
-                                    onAction(LoginScreenIntent.LoginActionClick)
+                                    coroutineScope.launch {
+                                        isDeviceConnectedToInternet =
+                                            checker.getConnectivityState().isConnected
+                                    }
+                                    onAction(
+                                        LoginScreenIntent.LoginActionClick(
+                                            isDeviceConnectedToInternet = isDeviceConnectedToInternet
+                                        )
+                                    )
                                 },
                                 enabled = true
                             )
@@ -164,12 +179,20 @@ fun LoginScreen(
         },
         content = { contentPadding ->
             when {
+                loginViewModelState.noInternetConnection -> {
+                    if (showToast) {
+                        showToast(message = stringResource(Res.string.no_internet_connection_text))
+                        showToast = false
+                    }
+                }
+
                 loginViewModelState.isLoading -> CustomLoadingDialog(
                     showDialog = loginViewModelState.isLoading,
                     message = stringResource(Res.string.authenticating_text)
                 )
 
                 loginViewModelState.responseSuccess -> {
+                    keyValueStorage.rememberMe = loginViewModelState.rememberMe
                     onAction(LoginScreenIntent.HomeActionClick)
                 }
 

@@ -8,6 +8,8 @@ data class LoginScreenState(
     val emailError: String? = null,
     val passwordError: String? = null,
     val isLoading: Boolean = false,
+    val isDeviceConnectedToInternet: Boolean = false,
+    val noInternetConnection: Boolean = false,
     val responseSuccess: Boolean = false,
     val responseFailed: Boolean = false,
     val errorMessage: String? = null,

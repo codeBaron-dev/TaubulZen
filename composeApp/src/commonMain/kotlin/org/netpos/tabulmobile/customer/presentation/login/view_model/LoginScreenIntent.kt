@@ -7,6 +7,6 @@ sealed class LoginScreenIntent {
     data class PasswordVisibilityChanged(val isPasswordVisible: Boolean) : LoginScreenIntent()
     data object ForgotPasswordActionClick : LoginScreenIntent()
     data object RegisterActionClick : LoginScreenIntent()
-    data object LoginActionClick : LoginScreenIntent()
+    data class LoginActionClick(val isDeviceConnectedToInternet: Boolean) : LoginScreenIntent()
     data object HomeActionClick : LoginScreenIntent()
 }

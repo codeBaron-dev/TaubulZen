@@ -7,5 +7,7 @@ import org.netpos.tabulmobile.customer.domain.remote.TabulResult
 
 interface LoginRepositoryInterface {
 
-    suspend fun login(loginPayloadModel: LoginPayloadModel): TabulResult<LoginResponseModel, ErrorDataTypes.Remote>
+    suspend fun login(
+        loginPayloadModel: LoginPayloadModel
+    ): TabulResult<LoginResponseModel, ErrorDataTypes.Remote>
 }

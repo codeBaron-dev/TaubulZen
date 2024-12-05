@@ -35,6 +35,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -46,22 +50,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
+import org.netpos.tabulmobile.ConnectivityCheckerProvider
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorage
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorageImpl
 import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenIntent
 import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenState
 import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenViewModel
-import org.netpos.tabulmobile.shared.data.emailRegex
+import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
-import org.netpos.tabulmobile.shared.presentation.utils.CustomLoadingDialog
 import org.netpos.tabulmobile.shared.presentation.utils.TabulButton
 import org.netpos.tabulmobile.showToast
-import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold
 import tabulmobile.composeapp.generated.resources.Res
 import tabulmobile.composeapp.generated.resources.accept_terms_text
-import tabulmobile.composeapp.generated.resources.authenticating_text
 import tabulmobile.composeapp.generated.resources.confirm_password_text
 import tabulmobile.composeapp.generated.resources.create_account_info_text
 import tabulmobile.composeapp.generated.resources.create_account_text
@@ -69,10 +74,10 @@ import tabulmobile.composeapp.generated.resources.dont_have_account
 import tabulmobile.composeapp.generated.resources.email_text
 import tabulmobile.composeapp.generated.resources.full_name_text
 import tabulmobile.composeapp.generated.resources.login_text
+import tabulmobile.composeapp.generated.resources.no_internet_connection_text
 import tabulmobile.composeapp.generated.resources.password_text
 import tabulmobile.composeapp.generated.resources.phone_number_text
 import tabulmobile.composeapp.generated.resources.register_text
-import tabulmobile.composeapp.generated.resources.unknown_error
 
 @Composable
 fun RegisterScreenRoot(
@@ -99,6 +104,12 @@ fun RegisterScreen(
     navigationEvent: SharedFlow<NavigationRoutes>,
 ) {
 
+    val coroutineScope = rememberCoroutineScope()
+    var showToast by remember { mutableStateOf(false) }
+    val checker = ConnectivityCheckerProvider.getConnectivityChecker()
+    var isDeviceConnectedToInternet by remember { mutableStateOf(false) }
+    val keyValueStorage: TabulKeyStorage = TabulKeyStorageImpl()
+
     LaunchedEffect(key1 = Unit) {
         navigationEvent.collect { destination ->
             navController.navigate(route = destination)
@@ -122,7 +133,15 @@ fun RegisterScreen(
                             TabulButton(
                                 resource = Res.string.register_text,
                                 actionClick = {
-                                    onAction(RegistrationScreenIntent.RegisterActionClick)
+                                    coroutineScope.launch {
+                                        isDeviceConnectedToInternet =
+                                            checker.getConnectivityState().isConnected
+                                        onAction(
+                                            RegistrationScreenIntent.RegisterActionClick(
+                                                isDeviceConnectedToInternet = isDeviceConnectedToInternet
+                                            )
+                                        )
+                                    }
                                 },
                                 enabled = true
                             )
@@ -161,22 +180,32 @@ fun RegisterScreen(
             )
         },
         content = { contentPadding ->
-
             when {
-                registerViewModelState.isLoading -> CustomLoadingDialog(
+                registerViewModelState.noInternetConnection -> {
+                    if (showToast) {
+                        showToast(message = stringResource(Res.string.no_internet_connection_text))
+                        showToast = false
+                    }
+                }
+
+                registerViewModelState.isLoading -> onAction(RegistrationScreenIntent.LocationActionClick)
+
+                    /* registerViewModelState.isLoading -> CustomLoadingDialog(
                     showDialog = registerViewModelState.isLoading,
                     message = stringResource(Res.string.authenticating_text)
-                )
+                )*/
 
                 registerViewModelState.responseSuccess -> {
-                    //onAction(RegistrationScreenIntent.HomeActionClick)
+                    onAction(RegistrationScreenIntent.LocationActionClick)
                 }
 
                 registerViewModelState.responseFailed -> {
-                    showToast(
-                        registerViewModelState.errorMessage
-                            ?: stringResource(Res.string.unknown_error)
-                    )
+                    coroutineScope.launch {
+                        if (showToast) {
+                            showToast(registerViewModelState.errorMessage.toString())
+                            showToast = false
+                        }
+                    }
                 }
             }
 
@@ -230,7 +259,6 @@ fun RegisterScreen(
                             )
                         },
                         shape = RoundedCornerShape(10.dp),
-                        isError = registerViewModelState.fullName.isBlank(),
                         trailingIcon = {
                             Icon(
                                 imageVector = Icons.Outlined.PersonOutline,
@@ -293,9 +321,6 @@ fun RegisterScreen(
                             )
                         },
                         shape = RoundedCornerShape(10.dp),
-                        isError = registerViewModelState.email.isBlank() || !emailRegex.matches(
-                            registerViewModelState.email
-                        ),
                         trailingIcon = {
                             Icon(imageVector = Icons.Outlined.Email, contentDescription = null)
                         },
@@ -355,7 +380,6 @@ fun RegisterScreen(
                             )
                         },
                         shape = RoundedCornerShape(10.dp),
-                        isError = registerViewModelState.phoneNumber.isBlank() || registerViewModelState.phoneNumber.length < 11,
                         trailingIcon = {
                             Icon(imageVector = Icons.Outlined.Phone, contentDescription = null)
                         },
@@ -415,7 +439,6 @@ fun RegisterScreen(
                             )
                         },
                         shape = RoundedCornerShape(10.dp),
-                        isError = registerViewModelState.password.isEmpty() || registerViewModelState.password.length < 8,
                         singleLine = true,
                         visualTransformation = if (registerViewModelState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {
@@ -486,7 +509,6 @@ fun RegisterScreen(
                             )
                         },
                         shape = RoundedCornerShape(10.dp),
-                        isError = registerViewModelState.confirmPassword.isEmpty() || registerViewModelState.confirmPassword.length < 8,
                         singleLine = true,
                         visualTransformation = if (registerViewModelState.isConfirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                         trailingIcon = {

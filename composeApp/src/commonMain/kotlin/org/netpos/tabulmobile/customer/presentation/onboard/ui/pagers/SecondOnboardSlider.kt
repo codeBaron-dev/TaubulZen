@@ -1,7 +1,6 @@
 package org.netpos.tabulmobile.customer.presentation.onboard.ui.pagers
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,8 +20,10 @@ import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
 import org.netpos.tabulmobile.customer.presentation.onboard.ui.SharedPageBottomBarView
+import org.netpos.tabulmobile.shared.presentation.utils.SharedOnboardImage
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.Res
+import tabulmobile.composeapp.generated.resources.onboard_group_eat_icon
 import tabulmobile.composeapp.generated.resources.second_pager_heading
 import tabulmobile.composeapp.generated.resources.second_pager_sub_heading
 import tabulmobile.composeapp.generated.resources.skip_text
@@ -63,20 +64,7 @@ fun SecondOnboardSlider(skipToLastPager: () -> Unit) {
                         }
                     )
                     Spacer(modifier = Modifier.height(145.dp))
-                    BoxWithConstraints(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier,
-                        content = {
-                            /*Image(
-                                modifier = Modifier
-                                    .width(304.dp).height(280.dp),
-                                colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.onSurface),
-                                imageVector = SplashScreenInteraction,
-                                contentScale = ContentScale.FillBounds,
-                                contentDescription = null
-                            )*/
-                        }
-                    )
+                    SharedOnboardImage(painter = Res.drawable.onboard_group_eat_icon)
                 }
             )
         }

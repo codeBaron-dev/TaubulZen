@@ -7,5 +7,7 @@ import org.netpos.tabulmobile.customer.domain.remote.TabulResult
 
 interface RegistrationRepositoryInterface {
 
-    suspend fun register(registrationPayloadModel: RegistrationPayloadModel): TabulResult<RegistrationResponseModel, ErrorDataTypes.Remote>
+    suspend fun register(
+        registrationPayloadModel: RegistrationPayloadModel
+    ): TabulResult<RegistrationResponseModel, ErrorDataTypes.Remote>
 }

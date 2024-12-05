@@ -9,7 +9,8 @@ sealed class RegistrationScreenIntent {
     data class ConfirmPasswordVisibilityChanged(val isConfirmPasswordVisible: Boolean) : RegistrationScreenIntent()
     data class ConfirmPasswordChanged(val confirmPassword: String) : RegistrationScreenIntent()
     data class AcceptTermsChanged(val acceptTerms: Boolean) : RegistrationScreenIntent()
-    data object RegisterActionClick : RegistrationScreenIntent()
+    data class RegisterActionClick(val isDeviceConnectedToInternet: Boolean) : RegistrationScreenIntent()
     data object LoginActionClick : RegistrationScreenIntent()
     data object HomeActionClick : RegistrationScreenIntent()
+    data object LocationActionClick : RegistrationScreenIntent()
 }

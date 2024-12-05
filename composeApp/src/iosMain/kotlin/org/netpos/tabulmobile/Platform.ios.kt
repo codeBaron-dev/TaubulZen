@@ -1,5 +1,7 @@
 package org.netpos.tabulmobile
 
+import org.netpos.tabulmobile.customer.domain.TabulIOSConnectivityChecker
+import org.netpos.tabulmobile.shared.domain.tabul_internet_configurations.ConnectivityChecker
 import platform.UIKit.UIAlertController
 import platform.UIKit.UIAlertControllerStyleAlert
 import platform.UIKit.UIApplication
@@ -32,5 +34,12 @@ actual fun showToast(message: String) {
         ) {
             alert.dismissViewControllerAnimated(true, null)
         }
+    }
+}
+
+@Suppress("EXPECT_ACTUAL_CLASSIFIERS_ARE_IN_BETA_WARNING")
+actual object ConnectivityCheckerProvider {
+    actual fun getConnectivityChecker(): ConnectivityChecker {
+        return TabulIOSConnectivityChecker()
     }
 }

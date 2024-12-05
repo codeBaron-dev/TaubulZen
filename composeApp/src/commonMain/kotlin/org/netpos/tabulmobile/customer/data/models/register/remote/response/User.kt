@@ -10,12 +10,10 @@ data class User(
     val createdAt: String?,
     @SerialName("email")
     val email: String?,
-    @SerialName("first_name")
-    val firstName: String?,
+    @SerialName("fullname")
+    val fullName: String?,
     @SerialName("id")
     val id: Int?,
-    @SerialName("last_name")
-    val lastName: String?,
     @SerialName("updated_at")
     val updatedAt: String?
 )

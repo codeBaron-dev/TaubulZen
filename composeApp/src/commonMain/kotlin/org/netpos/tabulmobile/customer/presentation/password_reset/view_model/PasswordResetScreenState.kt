@@ -9,5 +9,7 @@ data class PasswordResetScreenState(
     val responseSuccess: Boolean = false,
     val responseFailed: Boolean = false,
     val errorMessage: String? = null,
+    val isDeviceConnectedToInternet: Boolean = false,
+    val noInternetConnection: Boolean = false,
     val passwordResetResponse: PasswordResetResponse? = null
 )

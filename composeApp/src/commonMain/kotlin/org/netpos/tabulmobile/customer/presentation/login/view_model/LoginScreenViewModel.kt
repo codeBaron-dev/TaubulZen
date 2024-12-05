@@ -60,7 +60,8 @@ class LoginScreenViewModel(
                         _navigationEvent.emit(NavigationRoutes.ForgotPassword)
                     }
 
-                    LoginScreenIntent.LoginActionClick -> {
+                    is LoginScreenIntent.LoginActionClick -> {
+                        updateState { it.copy(isDeviceConnectedToInternet = intent.isDeviceConnectedToInternet) }
                         validateAndSubmitLoginForm()
                     }
 
@@ -86,7 +87,11 @@ class LoginScreenViewModel(
         val currentState = _state.replayCache.firstOrNull() ?: LoginScreenState()
         val validationResult = validateLoginForm(currentState.email, currentState.password)
 
-        if (validationResult.isEmailValid && validationResult.isPasswordValid) {
+        if (
+            validationResult.isEmailValid &&
+            validationResult.isPasswordValid &&
+            currentState.isDeviceConnectedToInternet
+            ) {
             val loginPayloadModel = LoginPayloadModel(
                 email = currentState.email,
                 password = currentState.password
@@ -96,7 +101,8 @@ class LoginScreenViewModel(
             updateState {
                 it.copy(
                     emailError = validationResult.emailError,
-                    passwordError = validationResult.passwordError
+                    passwordError = validationResult.passwordError,
+                    noInternetConnection = false
                 )
             }
         }
@@ -115,7 +121,7 @@ class LoginScreenViewModel(
                     )
                 }
             }
-            .onError {  errorResponse ->
+            .onError { errorResponse ->
                 _state.update {
                     it.copy(
                         isLoading = false,

@@ -10,7 +10,9 @@ import org.netpos.tabulmobile.customer.domain.remote.map
 class PasswordResetRepository(
     private val remoteDataSource: RemoteDataSource
 ): PasswordResetRepositoryInterface {
-    override suspend fun forgotPassword(passwordResetPayloadModel: PasswordResetPayloadModel): TabulResult<PasswordResetResponse, ErrorDataTypes.Remote> {
+    override suspend fun forgotPassword(
+        passwordResetPayloadModel: PasswordResetPayloadModel
+    ): TabulResult<PasswordResetResponse, ErrorDataTypes.Remote> {
         return remoteDataSource.forgotPassword(passwordResetPayloadModel = passwordResetPayloadModel).map { it }
     }
 }

@@ -11,7 +11,9 @@ class RegistrationRepository(
     private val remoteDataSource: RemoteDataSource
 ) : RegistrationRepositoryInterface {
 
-    override suspend fun register(registrationPayloadModel: RegistrationPayloadModel): TabulResult<RegistrationResponseModel, ErrorDataTypes.Remote> {
+    override suspend fun register(
+        registrationPayloadModel: RegistrationPayloadModel
+    ): TabulResult<RegistrationResponseModel, ErrorDataTypes.Remote> {
         return remoteDataSource.register(registrationPayloadModel = registrationPayloadModel)
             .map { it }
     }

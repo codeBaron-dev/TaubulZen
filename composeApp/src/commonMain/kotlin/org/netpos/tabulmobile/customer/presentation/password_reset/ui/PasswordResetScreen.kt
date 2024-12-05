@@ -36,8 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
+import org.netpos.tabulmobile.ConnectivityCheckerProvider
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorage
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorageImpl
 import org.netpos.tabulmobile.customer.presentation.password_reset.view_model.PasswordResetScreenIntent
 import org.netpos.tabulmobile.customer.presentation.password_reset.view_model.PasswordResetScreenState
 import org.netpos.tabulmobile.customer.presentation.password_reset.view_model.PasswordResetViewModel
@@ -52,6 +56,7 @@ import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold
 import tabulmobile.composeapp.generated.resources.Res
 import tabulmobile.composeapp.generated.resources.authenticating_text
 import tabulmobile.composeapp.generated.resources.email_text
+import tabulmobile.composeapp.generated.resources.no_internet_connection_text
 import tabulmobile.composeapp.generated.resources.reset_password_info_text
 import tabulmobile.composeapp.generated.resources.reset_password_text
 import tabulmobile.composeapp.generated.resources.send_verification_code
@@ -84,6 +89,9 @@ fun PasswordResetScreen(
 
     val coroutineScope = rememberCoroutineScope()
     var showToast by remember { mutableStateOf(false) }
+    val checker = ConnectivityCheckerProvider.getConnectivityChecker()
+    var isDeviceConnectedToInternet by remember { mutableStateOf(false) }
+    val keyValueStorage: TabulKeyStorage = TabulKeyStorageImpl()
 
     LaunchedEffect(key1 = Unit) {
         navigationEvent.collect { destination ->
@@ -111,7 +119,12 @@ fun PasswordResetScreen(
                     TabulButton(
                         resource = Res.string.send_verification_code,
                         actionClick = {
-                            onAction(PasswordResetScreenIntent.SendEmailActionClick)
+                            coroutineScope.launch {
+                                isDeviceConnectedToInternet = checker.getConnectivityState().isConnected
+                                onAction(PasswordResetScreenIntent.SendEmailActionClick(
+                                    isDeviceConnectedToInternet = isDeviceConnectedToInternet
+                                ))
+                            }
                         },
                         enabled = true
                     )
@@ -119,30 +132,37 @@ fun PasswordResetScreen(
             )
         },
         content = { contentPadding ->
+
+            when {
+                passwordResetViewModelState.noInternetConnection -> {
+                    if (showToast) {
+                        showToast(message = stringResource(Res.string.no_internet_connection_text))
+                        showToast = false
+                    }
+                }
+
+                passwordResetViewModelState.isLoading -> CustomLoadingDialog(
+                    showDialog = passwordResetViewModelState.isLoading,
+                    message = stringResource(Res.string.authenticating_text)
+                )
+
+                passwordResetViewModelState.responseSuccess -> coroutineScope.launch {
+                    keyValueStorage.email = passwordResetViewModelState.email
+                    onAction(PasswordResetScreenIntent.OtpVerificationActionClick)
+                }
+
+
+                passwordResetViewModelState.responseFailed -> if (showToast) {
+                    showToast(passwordResetViewModelState.errorMessage.toString())
+                    showToast = false
+                }
+            }
+
             Column(
                 modifier = Modifier.fillMaxSize().padding(contentPadding)
                     .padding(horizontal = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 content = {
-                    when {
-                        passwordResetViewModelState.isLoading -> {
-                            CustomLoadingDialog(
-                                showDialog = passwordResetViewModelState.isLoading,
-                                message = stringResource(Res.string.authenticating_text)
-                            )
-                        }
-
-                        passwordResetViewModelState.responseSuccess -> {
-                            onAction(PasswordResetScreenIntent.OtpVerificationActionClick)
-                        }
-
-                        passwordResetViewModelState.responseFailed -> {
-                            if (showToast) {
-                                showToast(passwordResetViewModelState.errorMessage.toString())
-                                showToast = false
-                            }
-                        }
-                    }
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.TopStart,

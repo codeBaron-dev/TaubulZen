@@ -1,4 +1,4 @@
-package org.stakeny.stakeny.onboard.data.model.password_reset
+package org.netpos.tabulmobile.customer.data.models.password_reset
 
 data class ResetPasswordFormValidationModel(
     val isPasswordValid: Boolean,
