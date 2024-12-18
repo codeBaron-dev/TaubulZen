@@ -57,4 +57,19 @@
     <string name="creating_account_text">Creating account...</string>
     <string name="verifying_otp_text">Verifying OTP...</string>
     <string name="sending_verification_otp">Sending verification OTP...</string>
+    <string name="home_text">Home</string>
+    <string name="basket_text">Basket</string>
+    <string name="favourite_text">Favourite</string>
+    <string name="account_text">Account</string>
+    <string name="home_location_text">Location</string>
+    <string name="dummy_location_text">Victoria Island, Lagos</string>
+    <string name="promotions_text">Promotions</string>
+    <string name="popular_brand_text">Popular Brand</string>
+    <string name="top_meals_text">Top Meals</string>
+    <string name="searching_text">Searching...</string>
+    <string name="dummy_promotion_text">50% OFF on all orders</string>
+    <string name="dummy_restaurant_name_text">Pizza Hut</string>
+    <string name="dummy_rating_text">4.5</string>
+    <string name="dummy_delivery_time_text">30-45 min</string>
+    <string name="dummy_delivery_fee_text">₦5000.00</string>"
 </resources>

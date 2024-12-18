@@ -1,4 +1,6 @@
 package org.netpos.tabulmobile.customer.presentation.home.view_model
 
-class HomeScreenViewModel {
+import androidx.lifecycle.ViewModel
+
+class HomeScreenViewModel: ViewModel() {
 }

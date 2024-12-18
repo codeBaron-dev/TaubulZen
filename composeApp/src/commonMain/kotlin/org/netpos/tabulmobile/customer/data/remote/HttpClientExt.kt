@@ -6,10 +6,11 @@ import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.statement.HttpResponse
 import io.ktor.util.network.UnresolvedAddressException
 import kotlinx.coroutines.ensureActive
-import org.netpos.tabulmobile.customer.data.remote.network.RemoteErrorModel
 import org.netpos.tabulmobile.customer.data.remote.network.TabulConstants.SERVER_ERROR_MESSAGE
+import org.netpos.tabulmobile.customer.data.remote.network.model.RemoteErrorModel
 import org.netpos.tabulmobile.customer.domain.remote.ErrorDataTypes
 import org.netpos.tabulmobile.customer.domain.remote.TabulResult
+import org.netpos.tabulmobile.shared.data.formatErrorMessage
 import kotlin.coroutines.coroutineContext
 
 suspend inline fun <reified T> safeCall(
@@ -43,7 +44,7 @@ suspend inline fun <reified T> responseToTabulResult(
         else -> {
             try {
                 val error = response.body<RemoteErrorModel>()
-                TabulResult.Error(error = error.message.toString())
+                TabulResult.Error(error = formatErrorMessage(error.errors))
             } catch(exception: Exception) {
                 TabulResult.Error(error = exception.message ?: SERVER_ERROR_MESSAGE)
             }

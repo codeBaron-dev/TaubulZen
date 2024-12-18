@@ -95,7 +95,7 @@ class LocationScreenViewModel(
 
                     LocationScreenIntent.OnDropdownDismissRequest -> onDropdownDismissRequest()
                     LocationScreenIntent.HomeActionClick -> {
-                        _navigationEvent.emit(value = NavigationRoutes.Home)
+                        _navigationEvent.emit(NavigationRoutes.NavigationRoot)
                     }
                 }
             }

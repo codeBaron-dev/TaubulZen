@@ -18,6 +18,8 @@ core-splashscreen = "1.0.1"
 
 #added libraries
 kotlinx-coroutines = "1.9.0"
+multiplatformSettingsNoArg = "1.2.0"
+multiplatformSettingsSerialization = "1.0.0"
 navigationCompose = "2.8.0-alpha10"
 kotlinSerialization = "1.7.3"
 koin = "4.0.0"
@@ -25,6 +27,8 @@ ktor = "3.0.0"
 coil3 = "3.0.0"
 ksp = "2.0.20-1.0.24"
 compass = "1.2.0"
+adaptive = "1.0.0"
+adaptiveLayout = "1.0.0-alpha03"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -70,6 +74,12 @@ compass-geocoder-mobile = { module = "dev.jordond.compass:geocoder-mobile", vers
 compass-autocomplete = { module = "dev.jordond.compass:autocomplete", version.ref = "compass" }
 compass-autocomplete-mobile = { module = "dev.jordond.compass:autocomplete-mobile", version.ref = "compass" }
 compass-permissions-mobile = { module = "dev.jordond.compass:permissions-mobile", version.ref = "compass" }
+adaptive = { module = "org.jetbrains.compose.material3.adaptive:adaptive", version.ref = "adaptive" }
+adaptive-layout = { module = "org.jetbrains.compose.material3.adaptive:adaptive-layout", version.ref = "adaptiveLayout" }
+adaptive-navigation = { module = "org.jetbrains.compose.material3.adaptive:adaptive-navigation", version.ref = "adaptiveLayout" }
+multiplatform-settings-coroutines = { module = "com.russhwolf:multiplatform-settings-coroutines", version.ref = "multiplatformSettingsNoArg" }
+multiplatform-settings-no-arg = { module = "com.russhwolf:multiplatform-settings-no-arg", version.ref = "multiplatformSettingsNoArg" }
+multiplatform-settings-serialization = { module = "com.russhwolf:multiplatform-settings-serialization", version.ref = "multiplatformSettingsSerialization" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

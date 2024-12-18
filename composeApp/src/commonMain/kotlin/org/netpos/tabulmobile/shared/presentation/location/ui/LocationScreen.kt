@@ -133,9 +133,11 @@ fun LocationScreen(
                 showDialog = locationScreenViewModelState.isLoading,
                 message = stringResource(Res.string.saving_location_text)
             )
+
             locationScreenViewModelState.responseSuccess -> {
                 onAction(LocationScreenIntent.HomeActionClick)
             }
+
             locationScreenViewModelState.responseFailed -> {
                 coroutineScope.launch {
                     if (showToast) {

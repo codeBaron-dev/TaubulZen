@@ -75,7 +75,7 @@ class LoginScreenViewModel(
 
                     LoginScreenIntent.HomeActionClick -> {
                         if (_state.replayCache.firstOrNull()?.responseSuccess == true) {
-                            _navigationEvent.emit(NavigationRoutes.Home)
+                            _navigationEvent.emit(NavigationRoutes.NavigationRoot)
                         }
                     }
                 }
@@ -136,6 +136,6 @@ class LoginScreenViewModel(
     private suspend fun updateState(transform: (LoginScreenState) -> LoginScreenState) {
         val currentState = _state.replayCache.firstOrNull() ?: LoginScreenState()
         val newState = transform(currentState)
-        _state.emit(newState) // Emit the updated state
+        _state.emit(newState)
     }
 }

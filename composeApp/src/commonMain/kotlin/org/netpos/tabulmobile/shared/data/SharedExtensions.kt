@@ -107,3 +107,18 @@ fun validateOtpForm(
         isOtp4Valid = isOtp4Valid
     )
 }
+
+fun formatErrorMessage(response: List<String?>?): String {
+    return when {
+        !response.isNullOrEmpty() -> {
+            val distinctErrors = response.distinct()
+            buildString {
+                appendLine("Oops! Something went wrong:")
+                distinctErrors.forEachIndexed { index, error ->
+                    appendLine("${index + 1}. $error")
+                }
+            }
+        }
+        else -> "An unexpected error occurred. Please try again."
+    }
+}

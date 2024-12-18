@@ -18,6 +18,9 @@ class TabulKeyStorageImpl: TabulKeyStorage {
     override var email: String?
         get() = settings[StorageKeys.EMAIL_KEY.key]
         set(value) { settings[StorageKeys.EMAIL_KEY.key] = value }
+    override var token: String?
+        get() = settings[StorageKeys.TOKEN_KEY.key]
+        set(value) { settings[StorageKeys.TOKEN_KEY.key] = value }
 
     override fun clearKeyStorage() {
         settings.clear()

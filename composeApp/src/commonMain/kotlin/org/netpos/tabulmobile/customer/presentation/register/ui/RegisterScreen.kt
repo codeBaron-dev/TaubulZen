@@ -61,12 +61,14 @@ import org.netpos.tabulmobile.customer.presentation.register.view_model.Registra
 import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenViewModel
 import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
+import org.netpos.tabulmobile.shared.presentation.utils.CustomLoadingDialog
 import org.netpos.tabulmobile.shared.presentation.utils.TabulButton
 import org.netpos.tabulmobile.showToast
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold
 import tabulmobile.composeapp.generated.resources.Res
 import tabulmobile.composeapp.generated.resources.accept_terms_text
+import tabulmobile.composeapp.generated.resources.authenticating_text
 import tabulmobile.composeapp.generated.resources.confirm_password_text
 import tabulmobile.composeapp.generated.resources.create_account_info_text
 import tabulmobile.composeapp.generated.resources.create_account_text
@@ -188,14 +190,13 @@ fun RegisterScreen(
                     }
                 }
 
-                registerViewModelState.isLoading -> onAction(RegistrationScreenIntent.LocationActionClick)
-
-                    /* registerViewModelState.isLoading -> CustomLoadingDialog(
+                registerViewModelState.isLoading -> CustomLoadingDialog(
                     showDialog = registerViewModelState.isLoading,
                     message = stringResource(Res.string.authenticating_text)
-                )*/
+                )
 
                 registerViewModelState.responseSuccess -> {
+                    keyValueStorage.email = registerViewModelState.email
                     onAction(RegistrationScreenIntent.LocationActionClick)
                 }
 

@@ -31,5 +31,16 @@ sealed interface NavigationRoutes {
     @Serializable
     data object Location : NavigationRoutes
 
+    @Serializable
+    data object NavigationRoot : NavigationRoutes
+
+    @Serializable
+    data object Basket : NavigationRoutes
+
+    @Serializable
+    data object Favourite : NavigationRoutes
+
+    @Serializable
+    data object Account : NavigationRoutes
 
 }

@@ -16,12 +16,12 @@ class SplashScreenViewModel: ViewModel() {
         viewModelScope.launch {
             when (intent) {
                 is SplashScreenIntent.NavigateToOnboarding -> {
-                    //_navigationEvent.emit(value = NavigationRoutes.Onboarding)
-                    _navigationEvent.emit(value = NavigationRoutes.Location)
+                    _navigationEvent.emit(value = NavigationRoutes.Onboarding)
+                    //_navigationEvent.emit(value = NavigationRoutes.Location)
                 }
 
                 SplashScreenIntent.NavigateToHome -> {
-                    _navigationEvent.emit(value = NavigationRoutes.Home)
+                    _navigationEvent.emit(value = NavigationRoutes.NavigationRoot)
                 }
 
                 SplashScreenIntent.NavigateToLogin -> {

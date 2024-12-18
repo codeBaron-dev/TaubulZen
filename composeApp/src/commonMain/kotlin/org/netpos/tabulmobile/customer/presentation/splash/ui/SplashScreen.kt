@@ -80,7 +80,7 @@ fun SplashScreen(
     val keyValueStorage: TabulKeyStorage = TabulKeyStorageImpl()
 
     Scaffold(
-        content = {
+        content = { contentPadding ->
             coroutineScope.launch {
                 /**check for internet connection and navigate to onboarding screen if no internet connection
                  * and show toast message if no internet connection
@@ -98,18 +98,19 @@ fun SplashScreen(
             }
 
             Box(
-                modifier = Modifier.padding(it).fillMaxSize()
+                modifier = Modifier.padding(contentPadding).fillMaxSize()
                     .windowInsetsPadding(WindowInsets.safeDrawing),
-                contentAlignment = Alignment.Center
-            ) {
-                Image(
-                    modifier = Modifier
-                        .width(100.dp).height(150.dp),
-                    painter = painterResource(if (isSystemInDarkTheme()) Res.drawable.tb_logo_light else Res.drawable.tb_logo),
-                    contentScale = ContentScale.FillWidth,
-                    contentDescription = null
-                )
-            }
+                contentAlignment = Alignment.Center,
+                content = {
+                    Image(
+                        modifier = Modifier
+                            .width(100.dp).height(150.dp),
+                        painter = painterResource(if (isSystemInDarkTheme()) Res.drawable.tb_logo_light else Res.drawable.tb_logo),
+                        contentScale = ContentScale.FillWidth,
+                        contentDescription = null
+                    )
+                }
+            )
         }
     )
 }

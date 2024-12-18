@@ -11,11 +11,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.LocationSearching
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -25,9 +30,11 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -50,6 +57,7 @@ import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold
 import tabulmobile.composeapp.generated.resources.Res
+import tabulmobile.composeapp.generated.resources.email_text
 
 @Composable
 fun CustomLoadingDialog(
@@ -215,6 +223,98 @@ fun SharedOnboardImage(
                 painter = painterResource(painter),
                 contentScale = ContentScale.FillBounds,
                 contentDescription = null
+            )
+        }
+    )
+}
+
+@Composable
+fun SharedLocationBottomSheet(sheetState: ModalBottomSheetState) {
+    val coroutineScope = rememberCoroutineScope()
+
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {},
+                navigationIcon = {
+                    IconButton(onClick = {}, content = {
+                        Icon(
+                            imageVector = Icons.Outlined.Close,
+                            contentDescription = null
+                        )
+                    })
+                },
+                actions = {}
+            )
+        },
+        content = { contentPadding ->
+            Column(
+                modifier = Modifier.padding(contentPadding).padding(16.dp),
+                content = {
+                    Text(
+                        text = "Select Location",
+                        style = MaterialTheme.typography.labelLarge.copy(
+                            fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
+                            fontSize = 16.sp
+                        )
+                    )
+                    Spacer(modifier = Modifier.height(10.dp))
+                    OutlinedTextField(
+                        value = "",
+                        onValueChange = {
+
+                        },
+                        label = {
+                            Text(
+                                text = stringResource(Res.string.email_text),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
+                                    fontSize = 13.sp
+                                )
+                            )
+                        },
+                        shape = RoundedCornerShape(10.dp),
+                        trailingIcon = {
+                            Icon(imageVector = Icons.Outlined.LocationSearching, contentDescription = null)
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Email
+                        ),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedTextColor = Color.LightGray,
+                            errorTextColor = Color.Red,
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            errorContainerColor = Color.Transparent,
+                            cursorColor = MaterialTheme.colorScheme.onSurface,
+                            errorCursorColor = Color.Red,
+                            selectionColors = LocalTextSelectionColors.current,
+                            unfocusedBorderColor = MaterialTheme.colorScheme.onSurface,
+                            errorBorderColor = Color.Red,
+                            focusedBorderColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(5.dp))
+                    /*Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.TopStart,
+                        content = {
+                            loginViewModelState.emailError?.let { errorMessage ->
+                                Text(
+                                    text = errorMessage,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
+                                        fontSize = 13.sp,
+                                        color = Color.Red
+                                    )
+                                )
+                            }
+                        }
+                    )*/
+                }
             )
         }
     )

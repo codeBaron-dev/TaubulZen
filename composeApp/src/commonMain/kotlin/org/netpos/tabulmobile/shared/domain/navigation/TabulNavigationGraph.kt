@@ -2,14 +2,25 @@ package org.netpos.tabulmobile.shared.domain.navigation
 
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import org.jetbrains.compose.resources.Font
+import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
-import org.netpos.tabulmobile.customer.presentation.home.ui.HomeScreenRoot
 import org.netpos.tabulmobile.customer.presentation.login.ui.LoginScreenRoot
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.navigation.NavigationRootScreen
 import org.netpos.tabulmobile.customer.presentation.onboard.ui.OnboardScreenRoot
 import org.netpos.tabulmobile.customer.presentation.onboard.viewmodel.OnboardScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.otp.view_model.OtpVerificationViewModel
@@ -23,7 +34,10 @@ import org.netpos.tabulmobile.customer.presentation.splash.ui.SplashScreenRoot
 import org.netpos.tabulmobile.customer.presentation.splash.view_model.SplashScreenViewModel
 import org.netpos.tabulmobile.shared.presentation.location.ui.LocationScreenRoot
 import org.netpos.tabulmobile.shared.presentation.location.view_model.LocationScreenViewModel
+import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
 import org.stakeny.stakeny.onboard.presentation.otp.ui.OtpVerificationScreenRoot
+import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
+import tabulmobile.composeapp.generated.resources.Res
 
 @Composable
 fun TabulNavigationGraph() {
@@ -110,11 +124,67 @@ fun TabulNavigationGraph() {
                 locationScreenViewModel = locationScreenViewModel
             )
         }
-        composable<NavigationRoutes.Home>(
+        composable<NavigationRoutes.NavigationRoot>(
             exitTransition = { fadeOut() },
             popEnterTransition = { fadeIn() }
         ) {
-            HomeScreenRoot()
+            NavigationRootScreen(navController = navController)
         }
     }
+}
+
+@Composable
+fun TabulBottomNavigationBar(
+    currentRoute: NavigationRoutes,
+    onItemSelected: (TabulNavigationItems) -> Unit,
+    content: @Composable () -> Unit = {}
+) {
+
+    val navSuiteType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+
+    val navigationItems = listOf(
+        TabulNavigationItems.Home,
+        TabulNavigationItems.Basket,
+        TabulNavigationItems.Favourite,
+        TabulNavigationItems.Account
+    )
+
+    NavigationSuiteScaffold(
+        modifier = Modifier.fillMaxSize(),
+        layoutType = navSuiteType,
+        navigationSuiteItems = {
+            navigationItems.forEach { item ->
+                val isSelected = currentRoute == item.route
+                item(
+                    selected = isSelected,
+                    onClick = { onItemSelected(item) },
+                    icon = {
+                        Icon(
+                            imageVector = item.defaultIcon,
+                            contentDescription = stringResource(item.title),
+                            tint = if(isSelected) {
+                                tabulColor
+                            } else {
+                                MaterialTheme.colorScheme.onSurface
+                            }
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = stringResource(item.title),
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
+                                color = if (isSelected) {
+                                   tabulColor
+                                } else {
+                                    MaterialTheme.colorScheme.onSurface
+                                }
+                            )
+                        )
+                    }
+                )
+            }
+        },
+        content = { content() }
+    )
 }
