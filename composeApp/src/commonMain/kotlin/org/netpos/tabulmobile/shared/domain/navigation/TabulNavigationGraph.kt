@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.login.ui.LoginScreenRoot
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.navigation.NavigationRootScreen
@@ -128,7 +129,11 @@ fun TabulNavigationGraph() {
             exitTransition = { fadeOut() },
             popEnterTransition = { fadeIn() }
         ) {
-            NavigationRootScreen(navController = navController)
+            val homeScreenViewModel: HomeScreenViewModel = koinViewModel()
+            NavigationRootScreen(
+                navController = navController,
+                homeScreenViewModel = homeScreenViewModel
+            )
         }
     }
 }

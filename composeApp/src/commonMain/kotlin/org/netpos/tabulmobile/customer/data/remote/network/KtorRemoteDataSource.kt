@@ -1,10 +1,12 @@
 package org.netpos.tabulmobile.customer.data.remote.network
 
 import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
 import org.netpos.tabulmobile.customer.data.models.create_new_password.payload.CreateNewPasswordPayloadModel
+import org.netpos.tabulmobile.customer.data.models.home_screen.response.HomeSpecialRestaurantResponse
 import org.netpos.tabulmobile.customer.data.models.location.payload.LocationPayloadModel
 import org.netpos.tabulmobile.customer.data.models.location.response.LocationResponseModel
 import org.netpos.tabulmobile.customer.data.models.login.remote.login.payload.LoginPayloadModel
@@ -88,6 +90,15 @@ class KtorRemoteDataSource(
             httpClient.post {
                 url(urlString = ApiConfig.UPLOAD_USER_LOCATION_ENDPOINT)
                 setBody(body = locationPayloadModel)
+            }
+        }
+    }
+
+    override suspend fun homeScreenRestaurantsInfo():
+            TabulResult<HomeSpecialRestaurantResponse, ErrorDataTypes.Remote> {
+        return safeCall {
+            httpClient.get {
+                url(urlString = ApiConfig.HOME_SCREEN_RESTAURANT_ENDPOINT)
             }
         }
     }

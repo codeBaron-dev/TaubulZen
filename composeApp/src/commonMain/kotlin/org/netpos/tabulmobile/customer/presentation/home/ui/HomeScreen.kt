@@ -27,8 +27,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ModalBottomSheetLayout
-import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DeliveryDining
@@ -41,7 +40,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.FilterList
-import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -51,14 +49,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,11 +70,26 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
+import org.netpos.tabulmobile.ConnectivityCheckerProvider
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorage
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorageImpl
+import org.netpos.tabulmobile.customer.data.models.home_screen.response.Data
+import org.netpos.tabulmobile.customer.data.models.home_screen.response.HomeSpecialRestaurantResponse
+import org.netpos.tabulmobile.customer.data.models.home_screen.response.RestaurantInformation
+import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenIntent
+import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenState
+import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenViewModel
+import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
-import org.netpos.tabulmobile.shared.presentation.utils.SharedLocationBottomSheet
+import org.netpos.tabulmobile.shared.presentation.utils.CustomLoadingDialog
+import org.netpos.tabulmobile.shared.presentation.utils.EmptyUiState
+import org.netpos.tabulmobile.showToast
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Bold
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_Regular
 import tabulmobile.composeapp.generated.resources.MontserratAlternates_SemiBold
@@ -82,23 +98,42 @@ import tabulmobile.composeapp.generated.resources.dummy_delivery_fee_text
 import tabulmobile.composeapp.generated.resources.dummy_delivery_time_text
 import tabulmobile.composeapp.generated.resources.dummy_location_text
 import tabulmobile.composeapp.generated.resources.dummy_promotion_text
-import tabulmobile.composeapp.generated.resources.dummy_rating_text
-import tabulmobile.composeapp.generated.resources.dummy_restaurant_name_text
+import tabulmobile.composeapp.generated.resources.empty_screen_state
 import tabulmobile.composeapp.generated.resources.food_image
 import tabulmobile.composeapp.generated.resources.home_location_text
-import tabulmobile.composeapp.generated.resources.popular_brand_text
-import tabulmobile.composeapp.generated.resources.promotions_text
+import tabulmobile.composeapp.generated.resources.loading_text
+import tabulmobile.composeapp.generated.resources.search_image
+import tabulmobile.composeapp.generated.resources.search_meals_or_restaurant_text
 import tabulmobile.composeapp.generated.resources.searching_text
-import tabulmobile.composeapp.generated.resources.top_meals_text
+import tabulmobile.composeapp.generated.resources.your_restaurant_list_is_empty_text
 
 @Composable
-fun HomeScreenRoot() {
+fun HomeScreenRoot(
+    sheetState: ModalBottomSheetState,
+    homeScreenViewModel: HomeScreenViewModel,
+    navController: NavHostController
+) {
+    val homeScreenState by homeScreenViewModel.state.collectAsState(initial = HomeScreenState())
 
-    HomeScreen()
+    HomeScreen(
+        sheetState = sheetState,
+        onAction = { intent ->
+            homeScreenViewModel.sendIntent(intent)
+        },
+        navigationEvents = homeScreenViewModel.navigationEvent,
+        homeScreenState = homeScreenState,
+        navController = navController
+    )
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    sheetState: ModalBottomSheetState,
+    onAction: (HomeScreenIntent) -> Unit,
+    navigationEvents: SharedFlow<NavigationRoutes>,
+    homeScreenState: HomeScreenState,
+    navController: NavHostController,
+) {
 
     val categories = listOf(
         Pair("Food Deals", "🛍️"),
@@ -107,20 +142,20 @@ fun HomeScreen() {
         Pair("Pizza & more", "🍕")
     )
 
-    var searchQuery by remember { mutableStateOf("") }
-    var active by remember { mutableStateOf(false) }
-    val suggestions = listOf("Restaurant", "Food", "Cafe", "Bar")
-    var isDeliverySelected by remember { mutableStateOf(true) }
-    var isRestaurantSelected by remember { mutableStateOf(false) }
-    var isSearchBarClicked by remember { mutableStateOf(false) }
+    var showToast by remember { mutableStateOf(false) }
+    val checker = ConnectivityCheckerProvider.getConnectivityChecker()
+    var isDeviceConnectedToInternet by remember { mutableStateOf(false) }
+    val keyValueStorage: TabulKeyStorage = TabulKeyStorageImpl()
+    var specialRestaurantResponse by remember { mutableStateOf<HomeSpecialRestaurantResponse?>(null) }
     val insets = WindowInsets.statusBars.asPaddingValues()
-
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
     val coroutineScope = rememberCoroutineScope()
-    val isSheetVisible = sheetState.currentValue != ModalBottomSheetValue.Hidden
 
-    var isSearchActive by rememberSaveable { mutableStateOf(false) }
-    val scrollBehavior = TopAppBarDefaults.pinnedScrollBehavior()
+    LaunchedEffect(key1 = Unit) {
+        showToast = true
+        navigationEvents.collect { destination ->
+            navController.navigate(route = destination)
+        }
+    }
 
     Scaffold(
         modifier = Modifier.padding(insets),
@@ -155,19 +190,31 @@ fun HomeScreen() {
                             Row(
                                 modifier = Modifier.weight(1f),
                                 content = {
-                                    Text(
-                                        text = stringResource(Res.string.dummy_location_text),
-                                        style = MaterialTheme.typography.labelMedium.copy(
-                                            fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
-                                            fontSize = 13.sp
+                                    TextButton(onClick = {
+                                        coroutineScope.launch {
+                                            sheetState.show()
+                                        }
+                                    }, content = {
+                                        Text(
+                                            text = stringResource(Res.string.dummy_location_text),
+                                            style = MaterialTheme.typography.labelMedium.copy(
+                                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
+                                                fontSize = 13.sp
+                                            )
                                         )
-                                    )
+                                    })
                                     Spacer(modifier = Modifier.width(8.dp))
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowDown,
-                                        contentDescription = null,
-                                        tint = tabulColor
-                                    )
+                                    IconButton(onClick = {
+                                        coroutineScope.launch {
+                                            sheetState.show()
+                                        }
+                                    }, content = {
+                                        Icon(
+                                            imageVector = Icons.Default.KeyboardArrowDown,
+                                            contentDescription = null,
+                                            tint = tabulColor
+                                        )
+                                    })
                                 }
                             )
 
@@ -183,129 +230,110 @@ fun HomeScreen() {
         },
         bottomBar = {},
         content = { contentPadding ->
-
-            ModalBottomSheetLayout(
-                sheetState = sheetState,
-                sheetContent = {
-                    SharedLocationBottomSheet(
-                        sheetState = sheetState
+            when {
+                homeScreenState.isLoading -> {
+                    CustomLoadingDialog(
+                        showDialog = homeScreenState.isLoading,
+                        message = stringResource(Res.string.loading_text)
                     )
-                },
-                sheetShape = RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp),
-                scrimColor = Color.Gray.copy(alpha = 0.5f),
+                }
+
+                homeScreenState.responseSuccess -> {
+                    specialRestaurantResponse = homeScreenState.homeSpecialRestaurantResponse
+                }
+
+                homeScreenState.responseFailed -> {
+                    coroutineScope.launch {
+                        if (showToast) {
+                            showToast(homeScreenState.errorMessage.toString())
+                            showToast = false
+                        }
+                    }
+                }
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(contentPadding)
+                    .padding(horizontal = 16.dp),
                 content = {
-                    LazyColumn(
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .padding(contentPadding)
-                            .padding(horizontal = 16.dp),
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center,
                         content = {
-                            item {
-                                Image(
-                                    painter = painterResource(Res.drawable.food_image),
-                                    contentDescription = null,
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .height(100.dp)
-                                        .clip(shape = RoundedCornerShape(5.dp))
+                            if (specialRestaurantResponse?.data.isNullOrEmpty()) {
+                                EmptyUiState(
+                                    message = stringResource(Res.string.your_restaurant_list_is_empty_text),
+                                    painter = Res.drawable.empty_screen_state
                                 )
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
-                            item {
-                                LazyRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            } else {
+                                LazyColumn(
                                     content = {
-                                        items(categories) { category ->
-                                            Surface(
-                                                color = MaterialTheme.colorScheme.surfaceContainer,
-                                                shape = RoundedCornerShape(16.dp),
+                                        //Ad banner
+                                        item {
+                                            Image(
+                                                painter = painterResource(Res.drawable.food_image),
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
                                                 modifier = Modifier
-                                                    .size(width = 120.dp, height = 100.dp),
+                                                    .fillMaxWidth()
+                                                    .height(100.dp)
+                                                    .clip(shape = RoundedCornerShape(5.dp))
+                                            )
+                                            Spacer(modifier = Modifier.height(8.dp))
+                                        }
+                                        //Restaurant categories
+                                        item {
+                                            LazyRow(
+                                                modifier = Modifier.fillMaxWidth(),
+                                                horizontalArrangement = Arrangement.spacedBy(16.dp),
                                                 content = {
-                                                    Column(
-                                                        modifier = Modifier
-                                                            .fillMaxSize()
-                                                            .padding(8.dp),
-                                                        verticalArrangement = Arrangement.SpaceAround,
-                                                        horizontalAlignment = Alignment.CenterHorizontally
-                                                    ) {
-                                                        Text(
-                                                            text = category.second,
-                                                            fontSize = 40.sp
-                                                        )
-                                                        Text(
-                                                            text = category.first,
-                                                            style = MaterialTheme.typography.labelMedium.copy(
-                                                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
-                                                                fontSize = 16.sp,
-                                                                textAlign = TextAlign.Center
-                                                            )
+                                                    items(categories) { category ->
+                                                        Surface(
+                                                            color = MaterialTheme.colorScheme.surfaceContainer,
+                                                            shape = RoundedCornerShape(16.dp),
+                                                            modifier = Modifier
+                                                                .size(
+                                                                    width = 120.dp,
+                                                                    height = 100.dp
+                                                                ),
+                                                            content = {
+                                                                Column(
+                                                                    modifier = Modifier
+                                                                        .fillMaxSize()
+                                                                        .padding(8.dp),
+                                                                    verticalArrangement = Arrangement.SpaceAround,
+                                                                    horizontalAlignment = Alignment.CenterHorizontally
+                                                                ) {
+                                                                    Text(
+                                                                        text = category.second,
+                                                                        fontSize = 40.sp
+                                                                    )
+                                                                    Text(
+                                                                        text = category.first,
+                                                                        style = MaterialTheme.typography.labelMedium.copy(
+                                                                            fontFamily = FontFamily(
+                                                                                Font(Res.font.MontserratAlternates_Regular)
+                                                                            ),
+                                                                            fontSize = 16.sp,
+                                                                            textAlign = TextAlign.Center
+                                                                        )
+                                                                    )
+                                                                }
+                                                            }
                                                         )
                                                     }
                                                 }
                                             )
+                                            Spacer(modifier = Modifier.height(8.dp))
                                         }
-                                    }
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
-                            item {
-                                Text(
-                                    text = stringResource(Res.string.promotions_text),
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
-                                        fontSize = 16.sp
-                                    )
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                LazyRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    content = {
-                                        items(10) {
-                                            FoodCard()
-                                        }
-                                    }
-                                )
-                            }
-                            item {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = stringResource(Res.string.popular_brand_text),
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
-                                        fontSize = 16.sp
-                                    )
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                LazyRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    content = {
-                                        items(10) {
-                                            FoodCard()
-                                        }
-                                    }
-                                )
-                            }
-                            item {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = stringResource(Res.string.top_meals_text),
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
-                                        fontSize = 16.sp
-                                    )
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                LazyRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    content = {
-                                        items(10) {
-                                            FoodCard()
+                                        //Special restaurant
+                                        specialRestaurantResponse?.data?.let { response ->
+                                            items(response) { restaurant ->
+                                                RestaurantCard(restaurant = restaurant)
+                                            }
                                         }
                                     }
                                 )
@@ -320,6 +348,8 @@ fun HomeScreen() {
 
 @Composable
 fun HomeTopBar() {
+
+    val keyValueStorage: TabulKeyStorage = TabulKeyStorageImpl()
     var searchQuery by remember { mutableStateOf("") }
     var active by remember { mutableStateOf(false) }
     val suggestions = listOf("Restaurant", "Food", "Cafe", "Bar")
@@ -345,7 +375,8 @@ fun HomeTopBar() {
                                 onSearch = {
                                     isSearchBarClicked = false
                                     active = false
-                                    // Perform search logic here
+                                    keyValueStorage.searchHistory = listOf(searchQuery)
+                                    //TODO: Perform search logic here
                                 },
                                 expanded = active,
                                 onExpandedChange = {
@@ -388,32 +419,48 @@ fun HomeTopBar() {
                             WindowInsets(0.dp)
                         },
                         content = {
-                            LazyColumn {
-                                items(suggestions.filter {
-                                    it.contains(
-                                        searchQuery,
-                                        ignoreCase = true
-                                    )
-                                }) { suggestion ->
-                                    ListItem(
-                                        headlineContent = {
-                                            Row(
-                                                content = {
-                                                    Icon(
-                                                        imageVector = Icons.Default.History,
-                                                        contentDescription = null
+                            if (keyValueStorage.searchHistory.isNullOrEmpty()) {
+                                Column(
+                                    modifier = Modifier.fillMaxSize(),
+                                    verticalArrangement = Arrangement.Center,
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    content = {
+                                        EmptyUiState(
+                                            message = stringResource(Res.string.search_meals_or_restaurant_text),
+                                            painter = Res.drawable.search_image
+                                        )
+                                    }
+                                )
+                            } else {
+                                LazyColumn {
+                                    keyValueStorage.searchHistory?.let { history ->
+                                        items(history.filter {
+                                            it.contains(
+                                                searchQuery,
+                                                ignoreCase = true
+                                            )
+                                        }) { suggestion ->
+                                            ListItem(
+                                                headlineContent = {
+                                                    Row(
+                                                        content = {
+                                                            Icon(
+                                                                imageVector = Icons.Default.History,
+                                                                contentDescription = null
+                                                            )
+                                                            Spacer(modifier = Modifier.width(8.dp))
+                                                            Text(suggestion)
+                                                        }
                                                     )
-                                                    Spacer(modifier = Modifier.width(8.dp))
-                                                    Text(suggestion)
+                                                },
+                                                modifier = Modifier.clickable {
+                                                    searchQuery = suggestion
+                                                    //isSearchBarClicked = false
+                                                    //active = false
                                                 }
                                             )
-                                        },
-                                        modifier = Modifier.clickable {
-                                            searchQuery = suggestion
-                                            isSearchBarClicked = false
-                                            active = false
                                         }
-                                    )
+                                    }
                                 }
                             }
                         },
@@ -488,12 +535,37 @@ fun HomeTopBar() {
 }
 
 @Composable
-fun FoodCard() {
+fun RestaurantCard(restaurant: Data) {
+    Spacer(modifier = Modifier.height(10.dp))
+    Text(
+        text = restaurant.name ?: stringResource(Res.string.loading_text),
+        style = MaterialTheme.typography.labelLarge.copy(
+            fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
+            fontSize = 16.sp
+        )
+    )
+    Spacer(modifier = Modifier.height(8.dp))
+    LazyRow(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        content = {
+            restaurant.data?.let { restaurant ->
+                items(restaurant) { data ->
+                    FoodCard(data = data)
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun FoodCard(data: RestaurantInformation) {
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
+            .clickable {  }
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Box {
@@ -505,22 +577,24 @@ fun FoodCard() {
                         .fillMaxWidth()
                         .height(120.dp)
                 )
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.TopStart)
-                        .background(Color.Red.copy(alpha = 0.8f))
-                        .padding(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(Res.string.dummy_promotion_text),
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
-                            fontSize = 13.sp
-                        ),
-                        modifier = Modifier.align(Alignment.Center)
-                    )
+                if (data.isOnPromo != 0) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.TopStart)
+                            .background(Color.Red.copy(alpha = 0.8f))
+                            .padding(8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(Res.string.dummy_promotion_text),
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
+                                fontSize = 13.sp
+                            ),
+                            modifier = Modifier.align(Alignment.Center)
+                        )
+                    }
                 }
                 IconButton(
                     onClick = { /* Handle favorite click */ },
@@ -546,7 +620,7 @@ fun FoodCard() {
                     .padding(6.dp)
             ) {
                 Text(
-                    text = stringResource(Res.string.dummy_restaurant_name_text),
+                    text = data.name ?: stringResource(Res.string.loading_text),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Bold)),
                         fontSize = 16.sp
@@ -563,7 +637,7 @@ fun FoodCard() {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = stringResource(Res.string.dummy_rating_text),
+                            text = data.rating ?: stringResource(Res.string.loading_text),
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
                                 fontSize = 13.sp
@@ -580,7 +654,7 @@ fun FoodCard() {
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text(
-                            text = stringResource(Res.string.dummy_location_text),
+                            text = data.address ?: stringResource(Res.string.loading_text),
                             style = MaterialTheme.typography.bodySmall.copy(
                                 fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
                                 fontSize = 13.sp
@@ -633,5 +707,53 @@ fun FoodCard() {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun RemoteSearchedResultItem() {
+    var tabIndex by remember { mutableStateOf(0) }
+    val tabsTitle = listOf("Restaurant", "Meals")
+
+    Column(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        TabRow(
+            selectedTabIndex = tabIndex,
+            divider = {},
+            tabs = {
+                tabsTitle.forEachIndexed { index, title ->
+                    Tab(
+                        text = {
+                            Text(
+                                text = title,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
+                                    fontSize = 13.sp
+                                )
+                            )
+                        },
+                        selected = tabIndex == index,
+                        onClick = { tabIndex = index },
+                        selectedContentColor = tabulColor,
+                        unselectedContentColor = Color.Gray
+                    )
+                }
+                when(tabIndex) {
+                    0 -> {
+                        LazyColumn(
+                            content = {
+                                items(10) {
+                                    //RestaurantCard(restaurant = )
+                                }
+                            }
+                        )
+                    }
+                    1 -> {
+                        Text(text = "Orders")
+                    }
+                }
+            }
+        )
     }
 }

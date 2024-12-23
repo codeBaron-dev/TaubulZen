@@ -4,6 +4,7 @@ interface TabulKeyStorage {
     var rememberMe: Boolean?
     var email: String?
     var token: String?
+    var searchHistory: List<String>?
 
     fun clearKeyStorage()
 }

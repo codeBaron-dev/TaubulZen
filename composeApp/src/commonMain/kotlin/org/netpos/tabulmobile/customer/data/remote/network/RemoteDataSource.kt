@@ -1,6 +1,7 @@
 package org.netpos.tabulmobile.customer.data.remote.network
 
 import org.netpos.tabulmobile.customer.data.models.create_new_password.payload.CreateNewPasswordPayloadModel
+import org.netpos.tabulmobile.customer.data.models.home_screen.response.HomeSpecialRestaurantResponse
 import org.netpos.tabulmobile.customer.data.models.location.payload.LocationPayloadModel
 import org.netpos.tabulmobile.customer.data.models.location.response.LocationResponseModel
 import org.netpos.tabulmobile.customer.data.models.login.remote.login.payload.LoginPayloadModel
@@ -39,4 +40,7 @@ interface RemoteDataSource {
     suspend fun uploadUserLocation(
         locationPayloadModel: LocationPayloadModel
     ): TabulResult<LocationResponseModel, ErrorDataTypes.Remote>
+
+    suspend fun homeScreenRestaurantsInfo():
+            TabulResult<HomeSpecialRestaurantResponse, ErrorDataTypes.Remote>
 }
