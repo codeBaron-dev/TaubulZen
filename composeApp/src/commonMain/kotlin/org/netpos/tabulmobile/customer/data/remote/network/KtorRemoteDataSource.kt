@@ -2,6 +2,7 @@ package org.netpos.tabulmobile.customer.data.remote.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
+import io.ktor.client.request.header
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.request.url
@@ -9,6 +10,7 @@ import org.netpos.tabulmobile.customer.data.models.create_new_password.payload.C
 import org.netpos.tabulmobile.customer.data.models.home_screen.response.HomeSpecialRestaurantResponse
 import org.netpos.tabulmobile.customer.data.models.location.payload.LocationPayloadModel
 import org.netpos.tabulmobile.customer.data.models.location.response.LocationResponseModel
+import org.netpos.tabulmobile.customer.data.models.location.response.saved.SavedUserLocationResponse
 import org.netpos.tabulmobile.customer.data.models.login.remote.login.payload.LoginPayloadModel
 import org.netpos.tabulmobile.customer.data.models.login.remote.login.response.LoginResponseModel
 import org.netpos.tabulmobile.customer.data.models.otp_verification.remote.payload.OtpVerificationPayloadModel
@@ -17,6 +19,10 @@ import org.netpos.tabulmobile.customer.data.models.password_reset.remote.payload
 import org.netpos.tabulmobile.customer.data.models.password_reset.remote.reponse.PasswordResetResponse
 import org.netpos.tabulmobile.customer.data.models.register.remote.payload.RegistrationPayloadModel
 import org.netpos.tabulmobile.customer.data.models.register.remote.response.RegistrationResponseModel
+import org.netpos.tabulmobile.customer.data.models.restaurant_details.response.details.RestaurantDetailResponse
+import org.netpos.tabulmobile.customer.data.models.restaurant_details.response.menu.RestaurantMenus
+import org.netpos.tabulmobile.customer.data.models.restaurant_details.response.menu_items.RestaurantMenuItemsResponse
+import org.netpos.tabulmobile.customer.data.models.restaurant_details.response.opning_hours.RestaurantOpeningHours
 import org.netpos.tabulmobile.customer.data.remote.network.ApiConfig.FORGOT_PASSWORD_ENDPOINT
 import org.netpos.tabulmobile.customer.data.remote.network.ApiConfig.OTP_VERIFICATION_ENDPOINT
 import org.netpos.tabulmobile.customer.data.remote.network.ApiConfig.REGISTER_ENDPOINT
@@ -94,11 +100,57 @@ class KtorRemoteDataSource(
         }
     }
 
-    override suspend fun homeScreenRestaurantsInfo():
+    override suspend fun homeScreenRestaurantsInfo(token: String):
             TabulResult<HomeSpecialRestaurantResponse, ErrorDataTypes.Remote> {
         return safeCall {
             httpClient.get {
+                header("Authorization", "Bearer $token")
                 url(urlString = ApiConfig.HOME_SCREEN_RESTAURANT_ENDPOINT)
+            }
+        }
+    }
+
+    override suspend fun getRestaurantDetail(restaurantId: String):
+            TabulResult<RestaurantDetailResponse, ErrorDataTypes.Remote> {
+        return safeCall {
+            httpClient.get {
+                url(urlString = "${ApiConfig.RESTAURANT_DETAILS_ENDPOINT}/$restaurantId")
+            }
+        }
+    }
+
+    override suspend fun getRestaurantMenus(restaurantId: String):
+            TabulResult<RestaurantMenus, ErrorDataTypes.Remote> {
+        return safeCall {
+            httpClient.get {
+                url(urlString = "${ApiConfig.RESTAURANT_MENU_ENDPOINT}/$restaurantId/menu/categories")
+            }
+        }
+    }
+
+    override suspend fun getRestaurantOpeningHours(menuId: String):
+            TabulResult<RestaurantOpeningHours, ErrorDataTypes.Remote> {
+        return safeCall {
+            httpClient.get {
+                url(urlString = "${ApiConfig.RESTAURANT_OPENING_HOURS_ENDPOINT}/$menuId/opening-hours")
+            }
+        }
+    }
+
+    override suspend fun getRestaurantMenuItems(menuId: String):
+            TabulResult<RestaurantMenuItemsResponse, ErrorDataTypes.Remote> {
+        return safeCall {
+            httpClient.get {
+                url(urlString = "${ApiConfig.RESTAURANT_MENU_ITEM_ENDPOINT}/$menuId/menu")
+            }
+        }
+    }
+
+    override suspend fun retrievedSavedLocation(email: String):
+            TabulResult<SavedUserLocationResponse, ErrorDataTypes.Remote> {
+        return safeCall {
+            httpClient.get {
+                url(urlString = "${ApiConfig.RETRIEVE_USER_SAVED_LOCATION_ENDPOINT}$email")
             }
         }
     }

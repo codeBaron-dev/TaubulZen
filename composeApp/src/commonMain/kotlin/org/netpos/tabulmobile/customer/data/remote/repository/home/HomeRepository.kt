@@ -9,8 +9,8 @@ import org.netpos.tabulmobile.customer.domain.remote.map
 class HomeRepository(
     private val remoteDataSource: RemoteDataSource
 ) : HomeRepositoryInterface {
-    override suspend fun homeScreenRestaurantsInfo():
+    override suspend fun homeScreenRestaurantsInfo(token: String):
             TabulResult<HomeSpecialRestaurantResponse, ErrorDataTypes.Remote> {
-        return remoteDataSource.homeScreenRestaurantsInfo().map { it }
+        return remoteDataSource.homeScreenRestaurantsInfo(token = token).map { it }
     }
 }

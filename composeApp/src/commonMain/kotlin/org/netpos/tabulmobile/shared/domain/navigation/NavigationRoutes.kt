@@ -43,4 +43,7 @@ sealed interface NavigationRoutes {
     @Serializable
     data object Account : NavigationRoutes
 
+    @Serializable
+    data object RestaurantDetail : NavigationRoutes
+
 }

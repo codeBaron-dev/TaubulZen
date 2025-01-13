@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorage
 import org.netpos.tabulmobile.customer.data.remote.repository.home.HomeRepository
 import org.netpos.tabulmobile.customer.domain.remote.onError
 import org.netpos.tabulmobile.customer.domain.remote.onSuccess
@@ -26,7 +27,7 @@ class HomeScreenViewModel(
     val navigationEvent = _navigationEvent.asSharedFlow()
 
     init {
-        getHomeScreenData()
+        //getHomeScreenData()
         handleIntents()
         viewModelScope.launch {
             _state.emit(HomeScreenState())
@@ -51,7 +52,10 @@ class HomeScreenViewModel(
                     HomeScreenIntent.LikedRestaurantClicked -> {}
                     HomeScreenIntent.NotificationClicked -> {}
                     HomeScreenIntent.RestaurantCategoryClicked -> {}
-                    HomeScreenIntent.RestaurantClicked -> {}
+                    HomeScreenIntent.RestaurantClicked -> {
+                        _navigationEvent.emit(NavigationRoutes.RestaurantDetail)
+                    }
+
                     HomeScreenIntent.SearchClicked -> {}
                     HomeScreenIntent.SearchedHistoryClicked -> {}
                 }
@@ -59,30 +63,33 @@ class HomeScreenViewModel(
         }
     }
 
-    private fun getHomeScreenData() = viewModelScope.launch {
-        _state.update { it.copy(isLoading = true) }
-        homeScreenRepository.homeScreenRestaurantsInfo()
-            .onSuccess { response ->
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        responseSuccess = true,
-                        responseFailed = false,
-                        homeSpecialRestaurantResponse = response
-                    )
+    fun getHomeScreenData(isDeviceConnectedToInternet: Boolean, keyValueStorage: TabulKeyStorage) =
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+            homeScreenRepository.homeScreenRestaurantsInfo(token = keyValueStorage.token.toString())
+                .onSuccess { response ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            responseSuccess = true,
+                            responseFailed = false,
+                            isDeviceConnectedToInternet = isDeviceConnectedToInternet,
+                            homeSpecialRestaurantResponse = response
+                        )
+                    }
                 }
-            }
-            .onError { errorResponse ->
-                _state.update {
-                    it.copy(
-                        isLoading = false,
-                        responseSuccess = false,
-                        responseFailed = true,
-                        errorMessage = errorResponse
-                    )
+                .onError { errorResponse ->
+                    _state.update {
+                        it.copy(
+                            isLoading = false,
+                            responseSuccess = false,
+                            responseFailed = true,
+                            isDeviceConnectedToInternet = isDeviceConnectedToInternet,
+                            errorMessage = errorResponse
+                        )
+                    }
                 }
-            }
-    }
+        }
 
     private suspend fun updateState(transform: (HomeScreenState) -> HomeScreenState) {
         val currentState = _state.replayCache.firstOrNull() ?: HomeScreenState()

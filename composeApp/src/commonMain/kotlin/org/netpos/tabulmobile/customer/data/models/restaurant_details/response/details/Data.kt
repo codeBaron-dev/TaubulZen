@@ -1,13 +1,15 @@
-package org.netpos.tabulmobile.customer.data.models.home_screen.response
+package org.netpos.tabulmobile.customer.data.models.restaurant_details.response.details
 
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RestaurantInformation(
+data class Data(
     @SerialName("address")
     val address: String?,
+    @SerialName("contact_number")
+    val contactNumber: String?,
     @SerialName("created_at")
     val createdAt: String?,
     @SerialName("discount_percentage")
@@ -22,14 +24,14 @@ data class RestaurantInformation(
     val longitude: String?,
     @SerialName("name")
     val name: String?,
-    @SerialName("restaurant_landing_image")
-    val restaurantLandingImage: String?,
-    @SerialName("restaurant_detail_image")
-    val restaurantDetailImage: String?,
+    @SerialName("opening_hours")
+    val openingHours: OpeningHours?,
     @SerialName("rating")
     val rating: String?,
-    @SerialName("restaurant_id")
-    val restaurantId: Int?,
+    @SerialName("restaurant_detail_image")
+    val restaurantDetailImage: String?,
+    @SerialName("restaurant_landing_image")
+    val restaurantLandingImage: String?,
     @SerialName("special_categories")
     val specialCategories: String?,
     @SerialName("updated_at")

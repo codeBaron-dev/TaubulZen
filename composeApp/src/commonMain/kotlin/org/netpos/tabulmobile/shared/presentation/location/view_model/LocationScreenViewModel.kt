@@ -132,6 +132,31 @@ class LocationScreenViewModel(
         }
     }
 
+    fun getSavedLocation(email: String) = viewModelScope.launch {
+        updateState { it.copy(isLoading = true) }
+        locationRepository.retrievedSavedLocation(email = /*email*/"apetudevbeast@gmail.com")
+            .onSuccess { response ->
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        responseSuccess = true,
+                        responseFailed = false,
+                        savedUserLocationResponse = response
+                    )
+                }
+            }
+            .onError { message ->
+                _state.update {
+                    it.copy(
+                        isLoading = false,
+                        responseSuccess = false,
+                        responseFailed = true,
+                        errorMessage = message
+                    )
+                }
+            }
+    }
+
     private suspend fun onSearchQueryChanged() {
         val currentState = _state.replayCache.firstOrNull() ?: LocationScreenState()
         updateState { it.copy(searchQuery = currentState.searchQuery) }

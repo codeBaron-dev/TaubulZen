@@ -76,6 +76,7 @@ kotlin {
             implementation(libs.adaptive)
             implementation(libs.adaptive.layout)
             implementation(libs.adaptive.navigation)
+            implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.1")
         }
         nativeMain.dependencies {
             implementation(libs.ktor.client.darwin)
@@ -112,5 +113,6 @@ android {
 }
 
 dependencies {
+    implementation(libs.places)
     debugImplementation(compose.uiTooling)
 }

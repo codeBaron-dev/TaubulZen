@@ -31,6 +31,8 @@ import org.netpos.tabulmobile.customer.presentation.password_reset.ui.PasswordRe
 import org.netpos.tabulmobile.customer.presentation.password_reset.view_model.PasswordResetViewModel
 import org.netpos.tabulmobile.customer.presentation.register.ui.RegisterScreenRoot
 import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.restaurant_details.ui.RestaurantScreenRoot
+import org.netpos.tabulmobile.customer.presentation.restaurant_details.view_model.RestaurantDetailScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.splash.ui.SplashScreenRoot
 import org.netpos.tabulmobile.customer.presentation.splash.view_model.SplashScreenViewModel
 import org.netpos.tabulmobile.shared.presentation.location.ui.LocationScreenRoot
@@ -130,9 +132,22 @@ fun TabulNavigationGraph() {
             popEnterTransition = { fadeIn() }
         ) {
             val homeScreenViewModel: HomeScreenViewModel = koinViewModel()
+            val locationScreenViewModel: LocationScreenViewModel = koinViewModel()
             NavigationRootScreen(
                 navController = navController,
-                homeScreenViewModel = homeScreenViewModel
+                homeScreenViewModel = homeScreenViewModel,
+                locationScreenViewModel = locationScreenViewModel
+            )
+        }
+
+        composable<NavigationRoutes.RestaurantDetail>(
+            exitTransition = { fadeOut() },
+            popEnterTransition = { fadeIn() }
+        ) {
+            val restaurantDetailScreenViewModel: RestaurantDetailScreenViewModel = koinViewModel()
+            RestaurantScreenRoot(
+                navController = navController,
+                restaurantDetailScreenViewModel = restaurantDetailScreenViewModel
             )
         }
     }
@@ -145,7 +160,8 @@ fun TabulBottomNavigationBar(
     content: @Composable () -> Unit = {}
 ) {
 
-    val navSuiteType = NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
+    val navSuiteType =
+        NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(currentWindowAdaptiveInfo())
 
     val navigationItems = listOf(
         TabulNavigationItems.Home,
@@ -167,7 +183,7 @@ fun TabulBottomNavigationBar(
                         Icon(
                             imageVector = item.defaultIcon,
                             contentDescription = stringResource(item.title),
-                            tint = if(isSelected) {
+                            tint = if (isSelected) {
                                 tabulColor
                             } else {
                                 MaterialTheme.colorScheme.onSurface
@@ -180,7 +196,7 @@ fun TabulBottomNavigationBar(
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
                                 color = if (isSelected) {
-                                   tabulColor
+                                    tabulColor
                                 } else {
                                     MaterialTheme.colorScheme.onSurface
                                 }

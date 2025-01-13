@@ -1,5 +1,6 @@
 package org.netpos.tabulmobile.shared.data
 
+import kotlinx.datetime.LocalTime
 import org.netpos.tabulmobile.customer.data.models.location.LocationFormValidationModel
 import org.netpos.tabulmobile.customer.data.models.login.LoginFormValidationModel
 import org.netpos.tabulmobile.customer.data.models.otp_verification.OtpFormValidationModel
@@ -121,4 +122,40 @@ fun formatErrorMessage(response: List<String?>?): String {
         }
         else -> "An unexpected error occurred. Please try again."
     }
+}
+
+fun formatTime(time: String): String {
+    return try {
+        val localTime: LocalTime = LocalTime.parse(time)
+        localTime.toString() // Modify this format as needed
+    } catch (e: Exception) {
+        "Invalid Time"
+    }
+}
+
+fun formatTimeToReadable(time: String): String {
+    // Parse the input time into a LocalTime object
+    val localTime = LocalTime.parse(time)
+
+    // Extract hour and minute
+    val hour = if (localTime.hour % 12 == 0) 12 else localTime.hour % 12
+    val minute = localTime.minute
+    val period = if (localTime.hour < 12) "AM" else "PM"
+
+    // Build the formatted string manually
+    val hourString = if (hour < 10) "0$hour" else "$hour"
+    val minuteString = if (minute < 10) "0$minute" else "$minute"
+
+    return "$hourString:$minuteString $period"
+}
+
+
+fun formatToNaira(amount: String): String {
+    val parts = amount.split(".")
+    val integerPart = parts[0].toLongOrNull() ?: 0L
+    val decimalPart = if (parts.size > 1) parts[1].take(2) else "00"
+
+    val formattedIntegerPart = integerPart.toString().reversed().chunked(3).joinToString(",").reversed()
+
+    return "₦$formattedIntegerPart.$decimalPart"
 }

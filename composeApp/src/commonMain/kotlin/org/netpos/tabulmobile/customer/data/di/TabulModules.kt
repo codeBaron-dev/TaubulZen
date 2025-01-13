@@ -20,12 +20,15 @@ import org.netpos.tabulmobile.customer.data.remote.repository.password_reset.Pas
 import org.netpos.tabulmobile.customer.data.remote.repository.password_reset.PasswordResetRepositoryInterface
 import org.netpos.tabulmobile.customer.data.remote.repository.register.RegistrationRepository
 import org.netpos.tabulmobile.customer.data.remote.repository.register.RegistrationRepositoryInterface
+import org.netpos.tabulmobile.customer.data.remote.repository.restaurant_detail.RestaurantDetailRepository
+import org.netpos.tabulmobile.customer.data.remote.repository.restaurant_detail.RestaurantDetailRepositoryInterface
 import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.onboard.viewmodel.OnboardScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.otp.view_model.OtpVerificationViewModel
 import org.netpos.tabulmobile.customer.presentation.password_reset.view_model.PasswordResetViewModel
 import org.netpos.tabulmobile.customer.presentation.register.view_model.RegistrationScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.restaurant_details.view_model.RestaurantDetailScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.splash.view_model.SplashScreenViewModel
 import org.netpos.tabulmobile.shared.presentation.location.view_model.LocationScreenViewModel
 
@@ -46,6 +49,7 @@ val sharedModule = module {
     }
     viewModel { LocationScreenViewModel(locationRepository = get()) }
     viewModel { HomeScreenViewModel(homeScreenRepository = get()) }
+    viewModel { RestaurantDetailScreenViewModel(restaurantDetailRepository = get()) }
 
     single { HttpClientFactory.create(engine = get()) }
     singleOf(::KtorRemoteDataSource).bind<RemoteDataSource>()
@@ -55,4 +59,5 @@ val sharedModule = module {
     singleOf(::OtpVerificationRepository).bind<OtpVerificationRepositoryInterface>()
     singleOf(::LocationRepository).bind<LocationRepositoryInterface>()
     singleOf(::HomeRepository).bind<HomeRepositoryInterface>()
+    singleOf(::RestaurantDetailRepository).bind<RestaurantDetailRepositoryInterface>()
 }

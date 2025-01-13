@@ -2,6 +2,7 @@ package org.netpos.tabulmobile.shared.presentation.location.view_model
 
 import dev.jordond.compass.Place
 import org.netpos.tabulmobile.customer.data.models.location.response.LocationResponseModel
+import org.netpos.tabulmobile.customer.data.models.location.response.saved.SavedUserLocationResponse
 
 data class LocationScreenState (
     val searchedAddress: List<String> = emptyList(),
@@ -27,5 +28,6 @@ data class LocationScreenState (
     val searchQuery: String = "",
     val places: List<Place> = emptyList(),
     val selectedPlace: Place? = null,
-    val isExpanded: Boolean = false
+    val isExpanded: Boolean = false,
+    val savedUserLocationResponse: SavedUserLocationResponse? = null,
 )

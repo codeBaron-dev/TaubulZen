@@ -8,7 +8,12 @@ object ApiConfig {
     const val OTP_VERIFICATION_ENDPOINT = "$BASE_URL/password-reset/verify-otp"
     const val CREATE_NEW_PASSWORD_ENDPOINT = "$BASE_URL/password-reset/reset"
     const val UPLOAD_USER_LOCATION_ENDPOINT = "$BASE_URL/locations"
+    const val RETRIEVE_USER_SAVED_LOCATION_ENDPOINT = "$BASE_URL/locations?email="
     const val HOME_SCREEN_RESTAURANT_ENDPOINT = "$BASE_URL/restaurants/special-categories"
+    const val RESTAURANT_DETAILS_ENDPOINT = "$BASE_URL/restaurants"
+    const val RESTAURANT_MENU_ENDPOINT = "$BASE_URL/restaurants"
+    const val RESTAURANT_OPENING_HOURS_ENDPOINT = "$BASE_URL/restaurants"
+    const val RESTAURANT_MENU_ITEM_ENDPOINT = "$BASE_URL/restaurants"
 }
 
 object TabulConstants {

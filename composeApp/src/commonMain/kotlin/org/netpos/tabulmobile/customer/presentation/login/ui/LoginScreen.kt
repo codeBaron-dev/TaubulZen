@@ -194,6 +194,7 @@ fun LoginScreen(
                 loginViewModelState.responseSuccess -> {
                     keyValueStorage.rememberMe = loginViewModelState.rememberMe
                     keyValueStorage.token = loginViewModelState.loginResponseModel?.data?.token
+                    keyValueStorage.userLoginInfo = loginViewModelState.loginResponseModel?.data?.user
                     onAction(LoginScreenIntent.HomeActionClick)
                 }
 

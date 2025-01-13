@@ -6,5 +6,6 @@ import org.netpos.tabulmobile.customer.domain.remote.TabulResult
 
 interface HomeRepositoryInterface {
 
-    suspend fun homeScreenRestaurantsInfo(): TabulResult<HomeSpecialRestaurantResponse, ErrorDataTypes.Remote>
+    suspend fun homeScreenRestaurantsInfo(token: String):
+            TabulResult<HomeSpecialRestaurantResponse, ErrorDataTypes.Remote>
 }

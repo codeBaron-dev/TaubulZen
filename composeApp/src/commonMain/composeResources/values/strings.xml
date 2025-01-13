@@ -78,4 +78,9 @@
     <string name="enter_new_address_text">Enter new address</string>
     <string name="recent_address_text">Recent Address</string>
     <string name="search_meals_or_restaurant_text">Search meals or restaurant</string>
+    <string name="dummy_opening_time_text">11:00 AM - 11:00 PM</string>
+    <string name="add_to_cart_text">Add to cart</string>
+    <string name="view_product_item_text">View Food Item</string>
+    <string name="opening_hours_text">Opening Hours</string>
+    <string name="empty_location_history_text">Empty location history</string>
 </resources>

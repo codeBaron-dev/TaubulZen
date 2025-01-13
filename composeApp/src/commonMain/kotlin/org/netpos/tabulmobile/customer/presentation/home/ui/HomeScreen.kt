@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ModalBottomSheetState
@@ -38,8 +39,9 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.outlined.FilterList
+import androidx.compose.material.icons.outlined.LocationOn
+import androidx.compose.material.icons.outlined.Timer
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -85,6 +87,8 @@ import org.netpos.tabulmobile.customer.data.models.home_screen.response.Restaura
 import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenIntent
 import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenState
 import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenViewModel
+import org.netpos.tabulmobile.customer.presentation.restaurant_details.ui.FoodItemCard
+import org.netpos.tabulmobile.shared.data.formatToNaira
 import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
 import org.netpos.tabulmobile.shared.presentation.theme.tabulColor
 import org.netpos.tabulmobile.shared.presentation.utils.CustomLoadingDialog
@@ -116,6 +120,7 @@ fun HomeScreenRoot(
     val homeScreenState by homeScreenViewModel.state.collectAsState(initial = HomeScreenState())
 
     HomeScreen(
+        homeScreenViewModel = homeScreenViewModel,
         sheetState = sheetState,
         onAction = { intent ->
             homeScreenViewModel.sendIntent(intent)
@@ -128,6 +133,7 @@ fun HomeScreenRoot(
 
 @Composable
 fun HomeScreen(
+    homeScreenViewModel: HomeScreenViewModel,
     sheetState: ModalBottomSheetState,
     onAction: (HomeScreenIntent) -> Unit,
     navigationEvents: SharedFlow<NavigationRoutes>,
@@ -142,6 +148,7 @@ fun HomeScreen(
         Pair("Pizza & more", "🍕")
     )
 
+    val restaurantState = rememberLazyListState()
     var showToast by remember { mutableStateOf(false) }
     val checker = ConnectivityCheckerProvider.getConnectivityChecker()
     var isDeviceConnectedToInternet by remember { mutableStateOf(false) }
@@ -152,6 +159,13 @@ fun HomeScreen(
 
     LaunchedEffect(key1 = Unit) {
         showToast = true
+        launch { isDeviceConnectedToInternet = checker.getConnectivityState().isConnected }
+        launch {
+            homeScreenViewModel.getHomeScreenData(
+                isDeviceConnectedToInternet = isDeviceConnectedToInternet,
+                keyValueStorage = keyValueStorage
+            )
+        }
         navigationEvents.collect { destination ->
             navController.navigate(route = destination)
         }
@@ -270,6 +284,7 @@ fun HomeScreen(
                                 )
                             } else {
                                 LazyColumn(
+                                    modifier = Modifier,
                                     content = {
                                         //Ad banner
                                         item {
@@ -287,10 +302,12 @@ fun HomeScreen(
                                         //Restaurant categories
                                         item {
                                             LazyRow(
+                                                state = restaurantState,
                                                 modifier = Modifier.fillMaxWidth(),
                                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                                 content = {
                                                     items(categories) { category ->
+
                                                         Surface(
                                                             color = MaterialTheme.colorScheme.surfaceContainer,
                                                             shape = RoundedCornerShape(16.dp),
@@ -332,7 +349,11 @@ fun HomeScreen(
                                         //Special restaurant
                                         specialRestaurantResponse?.data?.let { response ->
                                             items(response) { restaurant ->
-                                                RestaurantCard(restaurant = restaurant)
+                                                RestaurantCard(
+                                                    keyValueStorage = keyValueStorage,
+                                                    restaurant = restaurant,
+                                                    onAction = onAction
+                                                )
                                             }
                                         }
                                     }
@@ -371,11 +392,11 @@ fun HomeTopBar() {
                                 onQueryChange = {
                                     searchQuery = it
                                     isSearchBarClicked = true
+                                    keyValueStorage.searchHistory = listOf(it)
                                 },
                                 onSearch = {
                                     isSearchBarClicked = false
                                     active = false
-                                    keyValueStorage.searchHistory = listOf(searchQuery)
                                     //TODO: Perform search logic here
                                 },
                                 expanded = active,
@@ -419,6 +440,7 @@ fun HomeTopBar() {
                             WindowInsets(0.dp)
                         },
                         content = {
+                            keyValueStorage.searchHistory = suggestions
                             if (keyValueStorage.searchHistory.isNullOrEmpty()) {
                                 Column(
                                     modifier = Modifier.fillMaxSize(),
@@ -432,36 +454,41 @@ fun HomeTopBar() {
                                     }
                                 )
                             } else {
-                                LazyColumn {
-                                    keyValueStorage.searchHistory?.let { history ->
-                                        items(history.filter {
-                                            it.contains(
-                                                searchQuery,
-                                                ignoreCase = true
-                                            )
-                                        }) { suggestion ->
-                                            ListItem(
-                                                headlineContent = {
-                                                    Row(
-                                                        content = {
-                                                            Icon(
-                                                                imageVector = Icons.Default.History,
-                                                                contentDescription = null
-                                                            )
-                                                            Spacer(modifier = Modifier.width(8.dp))
-                                                            Text(suggestion)
-                                                        }
-                                                    )
-                                                },
-                                                modifier = Modifier.clickable {
-                                                    searchQuery = suggestion
-                                                    //isSearchBarClicked = false
-                                                    //active = false
-                                                }
-                                            )
+                                Column(
+                                    content = {
+                                        val searchHistory = keyValueStorage.searchHistory
+                                        searchHistory?.let { history ->
+                                           val filteredHistory = history.filter {
+                                                it.contains(
+                                                    searchQuery,
+                                                    ignoreCase = true
+                                                )
+                                            }
+                                            filteredHistory.forEachIndexed({ index, suggestion ->
+                                                ListItem(
+                                                    headlineContent = {
+                                                        Row(
+                                                            content = {
+                                                                Icon(
+                                                                    imageVector = Icons.Default.History,
+                                                                    contentDescription = null
+                                                                )
+                                                                Spacer(modifier = Modifier.width(8.dp))
+                                                                Text(suggestion)
+                                                            }
+                                                        )
+                                                    },
+                                                    modifier = Modifier.clickable {
+                                                        searchQuery = suggestion
+                                                        //isSearchBarClicked = false
+                                                        //active = false
+                                                    }
+                                                )
+                                            })
                                         }
+                                        RemoteSearchedResultItem()
                                     }
-                                }
+                                )
                             }
                         },
                         modifier = if (active) {
@@ -535,7 +562,11 @@ fun HomeTopBar() {
 }
 
 @Composable
-fun RestaurantCard(restaurant: Data) {
+fun RestaurantCard(
+    keyValueStorage: TabulKeyStorage,
+    restaurant: Data,
+    onAction: (HomeScreenIntent) -> Unit
+) {
     Spacer(modifier = Modifier.height(10.dp))
     Text(
         text = restaurant.name ?: stringResource(Res.string.loading_text),
@@ -551,7 +582,11 @@ fun RestaurantCard(restaurant: Data) {
         content = {
             restaurant.data?.let { restaurant ->
                 items(restaurant) { data ->
-                    FoodCard(data = data)
+                    RestaurantCardContent(
+                        data = data,
+                        onAction = onAction,
+                        keyValueStorage = keyValueStorage
+                    )
                 }
             }
         }
@@ -559,125 +594,132 @@ fun RestaurantCard(restaurant: Data) {
 }
 
 @Composable
-fun FoodCard(data: RestaurantInformation) {
+fun RestaurantCardContent(
+    data: RestaurantInformation,
+    onAction: (HomeScreenIntent) -> Unit,
+    keyValueStorage: TabulKeyStorage
+) {
+    val maxLength = 26 // Maximum character length
+    val coroutineScope = rememberCoroutineScope()
+
+    val truncatedText = if (data.name.toString().length > maxLength) {
+        data.name?.take(maxLength) + "..."
+    } else {
+        data.name
+    }
+
     Surface(
         color = MaterialTheme.colorScheme.surfaceContainer,
         modifier = Modifier
             .fillMaxWidth()
             .clip(RoundedCornerShape(8.dp))
-            .clickable {  }
-    ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Box {
-                Image(
-                    painter = painterResource(Res.drawable.food_image),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(120.dp)
-                )
-                if (data.isOnPromo != 0) {
+            .clickable {
+                coroutineScope.launch {
+                    keyValueStorage.restaurantInformation = data
+                    onAction(HomeScreenIntent.RestaurantClicked)
+                }
+            },
+        content = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                content = {
                     Box(
+                        modifier = Modifier.fillMaxWidth().height(120.dp),
+                        content = {
+                            Image(
+                                painter = painterResource(Res.drawable.food_image),
+                                contentDescription = null,
+                                contentScale = ContentScale.Crop,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                            )
+                            /*AsyncImage(
+                                model = data.restaurantDetailImage,
+                                contentDescription = null,
+                                modifier = Modifier
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )*/
+                            if (data.isOnPromo == 0) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .align(Alignment.TopStart)
+                                        .background(Color.Red.copy(alpha = 0.8f))
+                                        .padding(8.dp)
+                                ) {
+                                    Text(
+                                        text = stringResource(Res.string.dummy_promotion_text),
+                                        color = Color.White,
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
+                                            fontSize = 13.sp
+                                        ),
+                                        modifier = Modifier.align(Alignment.Center)
+                                    )
+                                }
+                            }
+                            IconButton(
+                                onClick = { /* Handle favorite click */ },
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .padding(8.dp)
+                                    .background(
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        shape = CircleShape
+                                    ),
+                                content = {
+                                    Icon(
+                                        imageVector = Icons.Default.FavoriteBorder,
+                                        contentDescription = null,
+                                        tint = Color.Red
+                                    )
+                                }
+                            )
+                        }
+                    )
+
+                    Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .align(Alignment.TopStart)
-                            .background(Color.Red.copy(alpha = 0.8f))
-                            .padding(8.dp)
+                            .padding(6.dp)
                     ) {
                         Text(
-                            text = stringResource(Res.string.dummy_promotion_text),
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
-                                fontSize = 13.sp
-                            ),
-                            modifier = Modifier.align(Alignment.Center)
-                        )
-                    }
-                }
-                IconButton(
-                    onClick = { /* Handle favorite click */ },
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp)
-                        .background(
-                            color = Color.White.copy(alpha = 0.8f),
-                            shape = CircleShape
-                        )
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        contentDescription = null,
-                        tint = Color.Red
-                    )
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(6.dp)
-            ) {
-                Text(
-                    text = data.name ?: stringResource(Res.string.loading_text),
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Bold)),
-                        fontSize = 16.sp
-                    )
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(vertical = 8.dp),
-                    content = {
-                        Icon(
-                            imageVector = Icons.Default.Star,
-                            contentDescription = null,
-                            tint = Color(0xFFFFD700)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = data.rating ?: stringResource(Res.string.loading_text),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
-                                fontSize = 13.sp
+                            text = truncatedText ?: stringResource(Res.string.loading_text),
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Bold)),
+                                fontSize = 16.sp
                             )
                         )
-                    }
-                )
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    content = {
-                        Icon(
-                            imageVector = Icons.Default.LocationOn,
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Text(
-                            text = data.address ?: stringResource(Res.string.loading_text),
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
-                                fontSize = 13.sp
-                            )
-                        )
-                    }
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(20.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    content = {
                         Row(
-                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = null,
+                                    tint = Color(0xFFFFD700)
+                                )
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Text(
+                                    text = data.rating ?: stringResource(Res.string.loading_text),
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
+                                        fontSize = 13.sp
+                                    )
+                                )
+                            }
+                        )
+                        Row(
                             verticalAlignment = Alignment.CenterVertically,
                             content = {
                                 Icon(
-                                    imageVector = Icons.Default.Timer,
+                                    imageVector = Icons.Outlined.LocationOn,
                                     contentDescription = null
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
-                                    text = stringResource(Res.string.dummy_delivery_time_text),
+                                    text = data.address ?: stringResource(Res.string.loading_text),
                                     style = MaterialTheme.typography.bodySmall.copy(
                                         fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
                                         fontSize = 13.sp
@@ -686,28 +728,53 @@ fun FoodCard(data: RestaurantInformation) {
                             }
                         )
                         Row(
-                            horizontalArrangement = Arrangement.End,
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(20.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             content = {
-                                Icon(
-                                    imageVector = Icons.Default.DeliveryDining,
-                                    contentDescription = null
+                                Row(
+                                    horizontalArrangement = Arrangement.Start,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    content = {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Timer,
+                                            contentDescription = null
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = stringResource(Res.string.dummy_delivery_time_text),
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
+                                                fontSize = 13.sp
+                                            )
+                                        )
+                                    }
                                 )
-                                Spacer(modifier = Modifier.width(4.dp))
-                                Text(
-                                    text = stringResource(Res.string.dummy_delivery_fee_text),
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
-                                        fontSize = 13.sp
-                                    )
+                                Row(
+                                    horizontalArrangement = Arrangement.End,
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    content = {
+                                        Icon(
+                                            imageVector = Icons.Default.DeliveryDining,
+                                            contentDescription = null
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            text = stringResource(Res.string.dummy_delivery_fee_text),
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
+                                                fontSize = 13.sp
+                                            )
+                                        )
+                                    }
                                 )
                             }
                         )
                     }
-                )
-            }
+                }
+            )
         }
-    }
+    )
 }
 
 @Composable
@@ -716,44 +783,51 @@ fun RemoteSearchedResultItem() {
     val tabsTitle = listOf("Restaurant", "Meals")
 
     Column(
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        TabRow(
-            selectedTabIndex = tabIndex,
-            divider = {},
-            tabs = {
-                tabsTitle.forEachIndexed { index, title ->
-                    Tab(
-                        text = {
-                            Text(
-                                text = title,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
-                                    fontSize = 13.sp
+        content = {
+            TabRow(
+                selectedTabIndex = tabIndex,
+                divider = {},
+                tabs = {
+                    tabsTitle.forEachIndexed { index, title ->
+                        Tab(
+                            text = {
+                                Text(
+                                    text = title,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
+                                        fontSize = 13.sp
+                                    )
                                 )
-                            )
-                        },
-                        selected = tabIndex == index,
-                        onClick = { tabIndex = index },
-                        selectedContentColor = tabulColor,
-                        unselectedContentColor = Color.Gray
-                    )
-                }
-                when(tabIndex) {
-                    0 -> {
-                        LazyColumn(
-                            content = {
-                                items(10) {
-                                    //RestaurantCard(restaurant = )
-                                }
-                            }
+                            },
+                            selected = tabIndex == index,
+                            onClick = { tabIndex = index },
+                            selectedContentColor = tabulColor,
+                            unselectedContentColor = Color.Gray
                         )
                     }
-                    1 -> {
-                        Text(text = "Orders")
-                    }
+                }
+            )
+            when(tabIndex) {
+                0 -> {
+
+                }
+                1 -> {
+                    LazyColumn(
+                        modifier = Modifier.padding(top = 5.dp),
+                        content = {
+                            items(10) {
+                                FoodItemCard(
+                                    foodName = "Pizza",
+                                    foodDescription = "Delicious pizza with cheese and sauce",
+                                    foodPrice = formatToNaira(amount = "3500"),
+                                    imageUrl = "",
+                                    onAddClicked = { /* Handle item click */ }
+                                )
+                            }
+                        }
+                    )
                 }
             }
-        )
-    }
+        }
+    )
 }
