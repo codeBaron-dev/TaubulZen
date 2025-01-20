@@ -18,6 +18,7 @@ import androidx.navigation.compose.rememberNavController
 import org.jetbrains.compose.resources.Font
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
+import org.netpos.tabulmobile.customer.presentation.basket.view_model.BasketScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.login.ui.LoginScreenRoot
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
@@ -133,10 +134,12 @@ fun TabulNavigationGraph() {
         ) {
             val homeScreenViewModel: HomeScreenViewModel = koinViewModel()
             val locationScreenViewModel: LocationScreenViewModel = koinViewModel()
+            val basketScreenViewModel: BasketScreenViewModel = koinViewModel()
             NavigationRootScreen(
                 navController = navController,
                 homeScreenViewModel = homeScreenViewModel,
-                locationScreenViewModel = locationScreenViewModel
+                locationScreenViewModel = locationScreenViewModel,
+                basketScreenViewModel = basketScreenViewModel
             )
         }
 
@@ -150,6 +153,17 @@ fun TabulNavigationGraph() {
                 restaurantDetailScreenViewModel = restaurantDetailScreenViewModel
             )
         }
+
+        /*composable<NavigationRoutes.Basket>(
+            exitTransition = { fadeOut() },
+            popEnterTransition = { fadeIn() }
+        ) {
+            val basketScreenViewModel: BasketScreenViewModel = koinViewModel()
+            BasketScreenRoot(
+                navController = navController,
+                basketScreenViewModel = basketScreenViewModel
+            )
+        }*/
     }
 }
 

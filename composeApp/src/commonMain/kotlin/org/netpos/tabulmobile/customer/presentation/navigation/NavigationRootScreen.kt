@@ -57,6 +57,8 @@ import org.jetbrains.compose.resources.stringResource
 import org.netpos.tabulmobile.ConnectivityCheckerProvider
 import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorage
 import org.netpos.tabulmobile.customer.data.local.shared_preferences.TabulKeyStorageImpl
+import org.netpos.tabulmobile.customer.presentation.basket.ui.BasketScreenRoot
+import org.netpos.tabulmobile.customer.presentation.basket.view_model.BasketScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.home.ui.HomeScreenRoot
 import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenViewModel
 import org.netpos.tabulmobile.shared.domain.navigation.NavigationRoutes
@@ -78,7 +80,8 @@ import tabulmobile.composeapp.generated.resources.update_location_text
 fun NavigationRootScreen(
     navController: NavHostController,
     homeScreenViewModel: HomeScreenViewModel,
-    locationScreenViewModel: LocationScreenViewModel
+    locationScreenViewModel: LocationScreenViewModel,
+    basketScreenViewModel: BasketScreenViewModel
 ) {
 
     val locationScreenViewModelState by locationScreenViewModel.state.collectAsState(initial = LocationScreenState())
@@ -127,7 +130,12 @@ fun NavigationRootScreen(
                                 }
 
                                 NavigationRoutes.Account -> {}
-                                NavigationRoutes.Basket -> {}
+                                NavigationRoutes.Basket -> {
+                                    BasketScreenRoot(
+                                        navController = navController,
+                                        basketScreenViewModel = basketScreenViewModel
+                                    )
+                                }
                                 NavigationRoutes.Favourite -> {}
                                 else -> {}
                             }

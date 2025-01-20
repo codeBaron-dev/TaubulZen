@@ -18,4 +18,5 @@ object ApiConfig {
 
 object TabulConstants {
     const val SERVER_ERROR_MESSAGE = "Don't Fret, try again later"
+    const val DUMMY_IMAGE = "https://www.peninsula.com/en/-/media/pch-offers/cny-brunch-1.jpg?mw=905&hash=954243BA55FF7E1B2B271E9256EA6900"
 }

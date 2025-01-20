@@ -476,65 +476,57 @@ fun FoodItemCard(
             .fillMaxWidth()
             .padding(top = 3.dp, bottom = 5.dp),
         shape = RoundedCornerShape(12.dp),
-    ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // Food Image
-            AsyncImage(
-                model = imageUrl,
-                contentDescription = null,
-                modifier = Modifier
-                    .size(100.dp)
-                    .clip(RoundedCornerShape(8.dp)),
-                contentScale = ContentScale.Crop
+        content = {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                content = {
+                    AsyncImage(
+                        model = imageUrl,
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(100.dp)
+                            .clip(RoundedCornerShape(8.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.SpaceBetween,
+                        content = {
+                            Text(
+                                text = foodName,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
+                                    fontSize = 13.sp
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Text(
+                                text = foodDescription,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
+                                    fontSize = 13.sp
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(8.dp))
+                            Text(
+                                text = foodPrice,
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Bold)),
+                                    fontSize = 13.sp
+                                )
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            TabulButton(
+                                resource = Res.string.view_product_item_text,
+                                actionClick = {},
+                                enabled = true
+                            )
+                        }
+                    )
+                }
             )
-
-            Spacer(modifier = Modifier.width(16.dp))
-
-            // Food Details
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text(
-                    text = foodName,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
-                        fontSize = 13.sp
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = foodDescription,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Regular)),
-                        fontSize = 13.sp
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Text(
-                    text = foodPrice,
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        fontFamily = FontFamily(Font(Res.font.MontserratAlternates_Bold)),
-                        fontSize = 13.sp
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
-
-                // Add Button
-                TabulButton(
-                    resource = Res.string.view_product_item_text,
-                    actionClick = {},
-                    enabled = true
-                )
-            }
         }
-    }
+    )
 }

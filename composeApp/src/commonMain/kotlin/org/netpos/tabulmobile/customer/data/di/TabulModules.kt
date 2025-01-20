@@ -22,6 +22,7 @@ import org.netpos.tabulmobile.customer.data.remote.repository.register.Registrat
 import org.netpos.tabulmobile.customer.data.remote.repository.register.RegistrationRepositoryInterface
 import org.netpos.tabulmobile.customer.data.remote.repository.restaurant_detail.RestaurantDetailRepository
 import org.netpos.tabulmobile.customer.data.remote.repository.restaurant_detail.RestaurantDetailRepositoryInterface
+import org.netpos.tabulmobile.customer.presentation.basket.view_model.BasketScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.home.view_model.HomeScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.login.view_model.LoginScreenViewModel
 import org.netpos.tabulmobile.customer.presentation.onboard.viewmodel.OnboardScreenViewModel
@@ -50,6 +51,7 @@ val sharedModule = module {
     viewModel { LocationScreenViewModel(locationRepository = get()) }
     viewModel { HomeScreenViewModel(homeScreenRepository = get()) }
     viewModel { RestaurantDetailScreenViewModel(restaurantDetailRepository = get()) }
+    viewModel { BasketScreenViewModel() }
 
     single { HttpClientFactory.create(engine = get()) }
     singleOf(::KtorRemoteDataSource).bind<RemoteDataSource>()

@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3Api::class)
+@file:OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
 
 package org.netpos.tabulmobile.shared.presentation.utils
 
@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.icons.Icons
@@ -217,6 +218,34 @@ fun TabulButton(
                     fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
                     fontSize = 13.sp,
                     color = Color.White
+                )
+            )
+        }
+    )
+}
+
+@Composable
+fun TabulSmallButton(
+    resource: StringResource,
+    actionClick: () -> Unit,
+    enabled: Boolean,
+    color: Color,
+    textColor: Color
+) {
+    Button(
+        modifier = Modifier.wrapContentWidth().height(42.dp),
+        onClick = {
+            actionClick.invoke()
+        },
+        enabled = enabled,
+        colors = ButtonDefaults.buttonColors(containerColor = color),
+        content = {
+            Text(
+                text = stringResource(resource = resource),
+                style = MaterialTheme.typography.labelMedium.copy(
+                    fontFamily = FontFamily(Font(Res.font.MontserratAlternates_SemiBold)),
+                    fontSize = 13.sp,
+                    color = textColor
                 )
             )
         }

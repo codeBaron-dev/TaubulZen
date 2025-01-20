@@ -83,4 +83,11 @@
     <string name="view_product_item_text">View Food Item</string>
     <string name="opening_hours_text">Opening Hours</string>
     <string name="empty_location_history_text">Empty location history</string>
+    <string name="my_basket_tab_text">My Basket</string>
+    <string name="orders_tab_text">Orders</string>
+    <string name="empty_screen_state">Your basket is empty</string>
+    <string name="meals_tab__text">Meals</string>
+    <string name="restaurant_tab_text">Restaurant</string>
+    <string name="checkout_text">Checkout</string>
+    <string name="add_more_items_text">Add items</string>
 </resources>

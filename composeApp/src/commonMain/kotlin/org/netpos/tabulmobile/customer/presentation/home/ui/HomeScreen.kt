@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -73,6 +75,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
+import coil3.compose.AsyncImage
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.Font
@@ -106,6 +109,8 @@ import tabulmobile.composeapp.generated.resources.empty_screen_state
 import tabulmobile.composeapp.generated.resources.food_image
 import tabulmobile.composeapp.generated.resources.home_location_text
 import tabulmobile.composeapp.generated.resources.loading_text
+import tabulmobile.composeapp.generated.resources.meals_tab__text
+import tabulmobile.composeapp.generated.resources.restaurant_tab_text
 import tabulmobile.composeapp.generated.resources.search_image
 import tabulmobile.composeapp.generated.resources.search_meals_or_restaurant_text
 import tabulmobile.composeapp.generated.resources.searching_text
@@ -458,7 +463,7 @@ fun HomeTopBar() {
                                     content = {
                                         val searchHistory = keyValueStorage.searchHistory
                                         searchHistory?.let { history ->
-                                           val filteredHistory = history.filter {
+                                            val filteredHistory = history.filter {
                                                 it.contains(
                                                     searchQuery,
                                                     ignoreCase = true
@@ -621,29 +626,29 @@ fun RestaurantCardContent(
             },
         content = {
             Column(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.width(300.dp),
                 content = {
                     Box(
                         modifier = Modifier.fillMaxWidth().height(120.dp),
                         content = {
-                            Image(
+                            /*Image(
                                 painter = painterResource(Res.drawable.food_image),
                                 contentDescription = null,
                                 contentScale = ContentScale.Crop,
                                 modifier = Modifier
                                     .fillMaxSize()
-                            )
-                            /*AsyncImage(
+                            )*/
+                            AsyncImage(
                                 model = data.restaurantDetailImage,
                                 contentDescription = null,
                                 modifier = Modifier
-                                    .fillMaxSize(),
+                                    .fillMaxWidth().fillMaxHeight(),
                                 contentScale = ContentScale.Crop
-                            )*/
+                            )
                             if (data.isOnPromo == 0) {
                                 Box(
                                     modifier = Modifier
-                                        .fillMaxWidth()
+                                        .wrapContentWidth()
                                         .align(Alignment.TopStart)
                                         .background(Color.Red.copy(alpha = 0.8f))
                                         .padding(8.dp)
@@ -780,7 +785,10 @@ fun RestaurantCardContent(
 @Composable
 fun RemoteSearchedResultItem() {
     var tabIndex by remember { mutableStateOf(0) }
-    val tabsTitle = listOf("Restaurant", "Meals")
+    val tabsTitle = listOf(
+        stringResource(Res.string.restaurant_tab_text),
+        stringResource(Res.string.meals_tab__text)
+    )
 
     Column(
         content = {
@@ -807,10 +815,11 @@ fun RemoteSearchedResultItem() {
                     }
                 }
             )
-            when(tabIndex) {
+            when (tabIndex) {
                 0 -> {
 
                 }
+
                 1 -> {
                     LazyColumn(
                         modifier = Modifier.padding(top = 5.dp),
